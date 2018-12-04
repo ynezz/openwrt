@@ -1,0 +1,16 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -153,13 +153,6 @@ AC_ARG_ENABLE([bindings-cxx],
+ 	[with_bindings_cxx=false])
+ AM_CONDITIONAL([WITH_BINDINGS_CXX], [test "x$with_bindings_cxx" = xtrue])
+ 
+-if test "x$with_bindings_cxx" = xtrue
+-then
+-	AC_LIBTOOL_CXX
+-	# This needs autoconf-archive
+-	AX_CXX_COMPILE_STDCXX_11([ext], [mandatory])
+-fi
+-
+ AC_ARG_ENABLE([bindings-python],
+ 	[AC_HELP_STRING([--enable-bindings-python],
+ 		[enable python3 bindings [default=no]])],
