@@ -805,11 +805,19 @@ err:
 
 static int ag71xx_stop(struct net_device *dev)
 {
+	unsigned long flags;
 	struct ag71xx *ag = netdev_priv(dev);
 
 	netif_carrier_off(dev);
 	phy_stop(ag->phy_dev);
 	ag71xx_hw_disable(ag);
+
+	spin_lock_irqsave(&ag->lock, flags);
+	if (ag->link) {
+		ag->link = 0;
+		ag71xx_link_adjust(ag);
+	}
+	spin_unlock_irqrestore(&ag->lock, flags);
 
 	return 0;
 }
