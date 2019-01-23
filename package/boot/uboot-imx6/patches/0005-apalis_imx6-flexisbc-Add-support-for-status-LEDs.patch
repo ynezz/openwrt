@@ -1,0 +1,151 @@
+From 4e028af30e6c8abdef6c924c531002f72523baf0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Mon, 18 Apr 2016 12:07:43 +0200
+Subject: [PATCH 5/9] apalis_imx6: flexisbc: Add support for status LEDs
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ board/toradex/apalis_imx6/Makefile       |   1 +
+ board/toradex/apalis_imx6/led_flexisbc.c | 118 +++++++++++++++++++++++++++++++
+ 2 files changed, 119 insertions(+)
+ create mode 100644 board/toradex/apalis_imx6/led_flexisbc.c
+
+diff --git a/board/toradex/apalis_imx6/Makefile b/board/toradex/apalis_imx6/Makefile
+index 128f179..b253c15 100644
+--- a/board/toradex/apalis_imx6/Makefile
++++ b/board/toradex/apalis_imx6/Makefile
+@@ -3,3 +3,4 @@
+ 
+ obj-y  := apalis_imx6.o do_fuse.o
+ obj-$(CONFIG_TDX_CMD_IMX_MFGR)  += pf0100.o
++obj-$(CONFIG_BOARD_GABEN_FLEXISBC)  += led_flexisbc.o
+diff --git a/board/toradex/apalis_imx6/led_flexisbc.c b/board/toradex/apalis_imx6/led_flexisbc.c
+new file mode 100644
+index 0000000..7d969c8
+--- /dev/null
++++ b/board/toradex/apalis_imx6/led_flexisbc.c
+@@ -0,0 +1,118 @@
++#include <common.h>
++#include <status_led.h>
++#include <asm/arch/mx6-pins.h>
++#include <asm/arch/imx-regs.h>
++#include <asm/mach-imx/iomux-v3.h>
++#include <asm/arch/gpio.h>
++#include <asm/gpio.h>
++#include <asm/io.h>
++
++static unsigned int saved_state[3] = {
++	CONFIG_LED_STATUS_OFF,
++	CONFIG_LED_STATUS_OFF,
++	CONFIG_LED_STATUS_OFF,
++};
++
++#define LED_BLUE	IMX_GPIO_NR(1, 17)
++#define LED_RED		IMX_GPIO_NR(4, 18)
++#define LED_GREEN	IMX_GPIO_NR(4, 19)
++
++#define STATUS_LED_RED 0
++#define STATUS_LED_GREEN 1
++#define STATUS_LED_BLUE 2
++
++void coloured_LED_init(void)
++{
++	static iomux_v3_cfg_t const flexisbc_led_pads[] = {
++		MX6_PAD_SD1_DAT1__GPIO1_IO17 | MUX_PAD_CTRL(NO_PAD_CTRL),
++		MX6_PAD_DI0_PIN2__GPIO4_IO18 | MUX_PAD_CTRL(NO_PAD_CTRL),
++		MX6_PAD_DI0_PIN3__GPIO4_IO19 | MUX_PAD_CTRL(NO_PAD_CTRL),
++	};
++
++	imx_iomux_v3_setup_multiple_pads(flexisbc_led_pads,
++					 ARRAY_SIZE(flexisbc_led_pads));
++	gpio_direction_output(LED_GREEN, 1);
++	gpio_direction_output(LED_RED, 1);
++	gpio_direction_output(LED_BLUE, 1);
++}
++
++void red_led_off(void)
++{
++	gpio_set_value(LED_RED, 1);
++	saved_state[STATUS_LED_RED] = CONFIG_LED_STATUS_OFF;
++}
++
++void green_led_off(void)
++{
++	gpio_set_value(LED_GREEN, 1);
++	saved_state[STATUS_LED_GREEN] = CONFIG_LED_STATUS_OFF;
++}
++
++void blue_led_off(void)
++{
++	gpio_set_value(LED_BLUE, 1);
++	saved_state[STATUS_LED_BLUE] = CONFIG_LED_STATUS_OFF;
++}
++
++void red_led_on(void)
++{
++	gpio_set_value(LED_RED, 0);
++	saved_state[STATUS_LED_RED] = CONFIG_LED_STATUS_ON;
++}
++
++void green_led_on(void)
++{
++	gpio_set_value(LED_GREEN, 0);
++	saved_state[STATUS_LED_GREEN] = CONFIG_LED_STATUS_ON;
++}
++
++void blue_led_on(void)
++{
++	gpio_set_value(LED_BLUE, 0);
++	saved_state[STATUS_LED_BLUE] = CONFIG_LED_STATUS_ON;
++}
++
++void __led_init(led_id_t mask, int state)
++{
++	__led_set(mask, state);
++}
++
++void __led_toggle(led_id_t mask)
++{
++	if (STATUS_LED_RED == mask) {
++		if (CONFIG_LED_STATUS_ON == saved_state[STATUS_LED_RED])
++			red_led_off();
++		else
++			red_led_on();
++	} else if (STATUS_LED_GREEN == mask) {
++		if (CONFIG_LED_STATUS_ON == saved_state[STATUS_LED_GREEN])
++			green_led_off();
++		else
++			green_led_on();
++	} else if (STATUS_LED_BLUE == mask) {
++		if (CONFIG_LED_STATUS_ON == saved_state[STATUS_LED_BLUE])
++			blue_led_off();
++		else
++			blue_led_on();
++	}
++}
++
++void __led_set(led_id_t mask, int state)
++{
++	if (STATUS_LED_RED == mask) {
++		if (CONFIG_LED_STATUS_ON == state)
++			red_led_on();
++		else
++			red_led_off();
++	} else if (STATUS_LED_GREEN == mask) {
++		if (CONFIG_LED_STATUS_ON == state)
++			green_led_on();
++		else
++			green_led_off();
++	} else if (STATUS_LED_BLUE == mask) {
++		if (CONFIG_LED_STATUS_ON == state)
++			blue_led_on();
++		else
++			blue_led_off();
++	}
++}
+-- 
+1.9.1
+

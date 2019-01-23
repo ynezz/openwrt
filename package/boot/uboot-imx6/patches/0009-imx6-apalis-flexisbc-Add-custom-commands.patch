@@ -1,0 +1,63 @@
+From 82be1b7d033b16c93c0b8f0f47a56ea7900a684a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Wed, 23 Jan 2019 18:49:23 +0100
+Subject: [PATCH 9/9] imx6: apalis: flexisbc: Add custom commands
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ include/configs/apalis_imx6.h | 27 ++++++++++++++++++++++++++-
+ 1 file changed, 26 insertions(+), 1 deletion(-)
+
+diff --git a/include/configs/apalis_imx6.h b/include/configs/apalis_imx6.h
+index afcd1b0..ee7a168 100644
+--- a/include/configs/apalis_imx6.h
++++ b/include/configs/apalis_imx6.h
+@@ -133,6 +133,26 @@
+ 
+ #define CONFIG_DRIVE_TYPES CONFIG_DRIVE_SATA CONFIG_DRIVE_MMC
+ 
++#define GPIO_DEFINE "btn0_gpio=20\0" \
++	"btn1_gpio=34\0" \
++	"btn2_gpio=35\0" \
++	"btn3_gpio=16\0" \
++	"led_blue_gpio=17\0" \
++	"led_red_gpio=114\0" \
++	"led_green_gpio=115\0"
++
++#define LED_COMMANDS "led_blue_off=gpio set $led_blue_gpio\0" \
++	"led_blue_on=gpio clear $led_blue_gpio\0" \
++	"led_green_off=gpio set $led_green_gpio\0" \
++	"led_green_on=gpio clear $led_green_gpio\0" \
++	"led_red_off=gpio set $led_red_gpio\0" \
++	"led_red_on=gpio clear $led_red_gpio\0"
++
++#define USB_UPDATE \
++	"usb_update=run led_blue_on; usb start && run led_blue_off; setenv interface usb; setenv drive 0; " \
++	"load ${interface} ${drive}:1 ${kernel_addr_r} " \
++	"sysupgrade-gaben-flexisbc/bootscript-flexisbc.scr && run led_blue_on; source ${kernel_addr_r}\0" \
++
+ #define DFU_ALT_EMMC_INFO \
+ 	"u-boot.imx raw 0x2 0x3ff mmcpart 0;" \
+ 	"boot part 0 1;" \
+@@ -240,9 +260,14 @@
+ 		"video=mxcfb0:dev=hdmi,1920x1080M@60,if=RGB24 " \
+ 		"video=mxcfb1:off video=mxcfb2:off video=mxcfb3:off " \
+ 		"fbmem=32M\0 " \
+-	"set_blkcnt=setexpr blkcnt ${filesize} + 0x1ff && setexpr blkcnt ${blkcnt} / 0x200\0"
++	"set_blkcnt=setexpr blkcnt ${filesize} + 0x1ff && setexpr blkcnt ${blkcnt} / 0x200\0" \
++	GPIO_DEFINE \
++	LED_COMMANDS \
++	USB_UPDATE
+ 
+ #define CONFIG_BOOTCOMMAND \
++	   "if gpio input $btn2_gpio; then setenv setup_done; fi; " \
++	   "if gpio input $btn3_gpio; then run usb_update; fi; " \
+ 	   "mmc dev 0;" \
+ 	   "if run loadbootscript; then " \
+ 		   "run bootscript; " \
+-- 
+1.9.1
+

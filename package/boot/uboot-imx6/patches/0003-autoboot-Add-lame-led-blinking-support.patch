@@ -1,0 +1,63 @@
+From 4f49186eca2d464414c705316dea90cf6acd9db8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Tue, 12 Apr 2016 15:17:03 +0200
+Subject: [PATCH 3/9] autoboot: Add lame led blinking support
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ common/autoboot.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/common/autoboot.c b/common/autoboot.c
+index 94133ea..7068b6d 100644
+--- a/common/autoboot.c
++++ b/common/autoboot.c
+@@ -14,6 +14,7 @@
+ #include <post.h>
+ #include <u-boot/sha256.h>
+ #include <bootcount.h>
++#include <status_led.h>
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+@@ -243,7 +244,12 @@ static int __abortboot(int bootdelay)
+ # endif
+ 				break;
+ 			}
++#if defined(CONFIG_LED_STATUS_BOOT)
++			status_led_tick(get_ticks());
++			udelay(100);
++#else
+ 			udelay(10000);
++#endif
+ 		} while (!abort && get_timer(ts) < 1000);
+ 
+ 		printf("\b\b\b%2d ", bootdelay);
+@@ -251,6 +257,11 @@ static int __abortboot(int bootdelay)
+ 
+ 	putc('\n');
+ 
++#if defined(CONFIG_LED_STATUS_BOOT)
++	if (abort)
++		status_led_set(CONFIG_LED_STATUS_BOOT, CONFIG_LED_STATUS_OFF);
++#endif
++
+ 	return abort;
+ }
+ # endif	/* CONFIG_AUTOBOOT_KEYED */
+@@ -334,6 +345,9 @@ void autoboot_command(const char *s)
+ 		int prev = disable_ctrlc(1);	/* disable Control C checking */
+ #endif
+ 
++#if defined(CONFIG_LED_STATUS_BOOT)
++		status_led_set(CONFIG_LED_STATUS_BOOT, CONFIG_LED_STATUS_OFF);
++#endif
+ 		run_command_list(s, -1, 0);
+ 
+ #if defined(CONFIG_AUTOBOOT_KEYED) && !defined(CONFIG_AUTOBOOT_KEYED_CTRLC)
+-- 
+1.9.1
+

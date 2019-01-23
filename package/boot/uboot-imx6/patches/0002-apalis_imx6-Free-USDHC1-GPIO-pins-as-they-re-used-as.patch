@@ -1,0 +1,86 @@
+From 7d8f45dccc9169eca97d4a7d9cb37038660b0f7d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Wed, 23 Jan 2019 13:39:21 +0100
+Subject: [PATCH 2/9] apalis_imx6: Free USDHC1 GPIO pins as they're used as
+ LEDS
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ board/toradex/apalis_imx6/apalis_imx6.c | 22 ++++++++++++++--------
+ include/configs/apalis_imx6.h           |  2 +-
+ 2 files changed, 15 insertions(+), 9 deletions(-)
+
+diff --git a/board/toradex/apalis_imx6/apalis_imx6.c b/board/toradex/apalis_imx6/apalis_imx6.c
+index 368db9c..4c60989 100644
+--- a/board/toradex/apalis_imx6/apalis_imx6.c
++++ b/board/toradex/apalis_imx6/apalis_imx6.c
+@@ -360,11 +360,13 @@ int board_ehci_power(int port, int on)
+ #endif
+ 
+ #ifdef CONFIG_FSL_ESDHC
+-/* use the following sequence: eMMC, MMC, SD */
++/* use the following sequence: eMMC, SD, MMC */
+ struct fsl_esdhc_cfg usdhc_cfg[CONFIG_SYS_FSL_USDHC_NUM] = {
+ 	{USDHC3_BASE_ADDR},
+-	{USDHC1_BASE_ADDR},
+ 	{USDHC2_BASE_ADDR},
++#if CONFIG_SYS_FSL_USDHC_NUM > 2
++	{USDHC1_BASE_ADDR},
++#endif
+ };
+ 
+ int board_mmc_getcd(struct mmc *mmc)
+@@ -393,12 +395,16 @@ int board_mmc_init(bd_t *bis)
+ 	u32 index = 0;
+ 
+ 	usdhc_cfg[0].sdhc_clk = mxc_get_clock(MXC_ESDHC3_CLK);
+-	usdhc_cfg[1].sdhc_clk = mxc_get_clock(MXC_ESDHC_CLK);
+-	usdhc_cfg[2].sdhc_clk = mxc_get_clock(MXC_ESDHC2_CLK);
++	usdhc_cfg[1].sdhc_clk = mxc_get_clock(MXC_ESDHC2_CLK);
++#if CONFIG_SYS_FSL_USDHC_NUM > 2
++	usdhc_cfg[2].sdhc_clk = mxc_get_clock(MXC_ESDHC_CLK);
++#endif
+ 
+ 	usdhc_cfg[0].max_bus_width = 8;
+-	usdhc_cfg[1].max_bus_width = 8;
+-	usdhc_cfg[2].max_bus_width = 4;
++	usdhc_cfg[1].max_bus_width = 4;
++#if CONFIG_SYS_FSL_USDHC_NUM > 2
++	usdhc_cfg[2].max_bus_width = 8;
++#endif
+ 
+ 	for (index = 0; index < CONFIG_SYS_FSL_USDHC_NUM; ++index) {
+ 		switch (index) {
+@@ -408,11 +414,11 @@ int board_mmc_init(bd_t *bis)
+ 			break;
+ 		case 1:
+ 			imx_iomux_v3_setup_multiple_pads(
+-				usdhc1_pads, ARRAY_SIZE(usdhc1_pads));
++				usdhc2_pads, ARRAY_SIZE(usdhc2_pads));
+ 			break;
+ 		case 2:
+ 			imx_iomux_v3_setup_multiple_pads(
+-				usdhc2_pads, ARRAY_SIZE(usdhc2_pads));
++				usdhc1_pads, ARRAY_SIZE(usdhc1_pads));
+ 			break;
+ 		default:
+ 			printf("Warning: you configured more USDHC controllers (%d) then supported by the board (%d)\n",
+diff --git a/include/configs/apalis_imx6.h b/include/configs/apalis_imx6.h
+index 3601891..afcd1b0 100644
+--- a/include/configs/apalis_imx6.h
++++ b/include/configs/apalis_imx6.h
+@@ -49,7 +49,7 @@
+ /* MMC Configs */
+ #define CONFIG_FSL_USDHC
+ #define CONFIG_SYS_FSL_ESDHC_ADDR	0
+-#define CONFIG_SYS_FSL_USDHC_NUM	3
++#define CONFIG_SYS_FSL_USDHC_NUM	2
+ 
+ #define CONFIG_SUPPORT_EMMC_BOOT	/* eMMC specific */
+ 
+-- 
+1.9.1
+

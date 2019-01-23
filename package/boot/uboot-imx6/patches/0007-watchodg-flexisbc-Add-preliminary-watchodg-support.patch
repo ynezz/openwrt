@@ -1,0 +1,87 @@
+From 494b91272d4ff0a827100d5fa5ede9880ff6197e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Mon, 18 Apr 2016 12:14:39 +0200
+Subject: [PATCH 7/9] watchodg: flexisbc: Add preliminary watchodg support
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ drivers/watchdog/Kconfig        |  5 +++++
+ drivers/watchdog/Makefile       |  1 +
+ drivers/watchdog/flexisbc_wdt.c | 34 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 40 insertions(+)
+ create mode 100644 drivers/watchdog/flexisbc_wdt.c
+
+diff --git a/drivers/watchdog/Kconfig b/drivers/watchdog/Kconfig
+index 10fd303..cec4da4 100644
+--- a/drivers/watchdog/Kconfig
++++ b/drivers/watchdog/Kconfig
+@@ -43,6 +43,11 @@ config TANGIER_WATCHDOG
+ 	  Intel Tangier SoC. If you're using a board with Intel Tangier
+ 	  SoC, say Y here.
+ 
++config FLEXISBC_WATCHDOG
++	bool "Gaben FlexiSBC watchdog"
++	depends on BOARD_GABEN_FLEXISBC
++	select HW_WATCHDOG
++
+ config ULP_WATCHDOG
+ 	bool "i.MX7ULP watchdog"
+ 	help
+diff --git a/drivers/watchdog/Makefile b/drivers/watchdog/Makefile
+index d901240..fd06df6 100644
+--- a/drivers/watchdog/Makefile
++++ b/drivers/watchdog/Makefile
+@@ -14,6 +14,7 @@ obj-$(CONFIG_S5P)               += s5p_wdt.o
+ obj-$(CONFIG_XILINX_TB_WATCHDOG) += xilinx_tb_wdt.o
+ obj-$(CONFIG_OMAP_WATCHDOG) += omap_wdt.o
+ obj-$(CONFIG_DESIGNWARE_WATCHDOG) += designware_wdt.o
++obj-$(CONFIG_FLEXISBC_WATCHDOG) += flexisbc_wdt.o
+ obj-$(CONFIG_TANGIER_WATCHDOG) += tangier_wdt.o
+ obj-$(CONFIG_ULP_WATCHDOG) += ulp_wdog.o
+ obj-$(CONFIG_WDT) += wdt-uclass.o
+diff --git a/drivers/watchdog/flexisbc_wdt.c b/drivers/watchdog/flexisbc_wdt.c
+new file mode 100644
+index 0000000..938f358
+--- /dev/null
++++ b/drivers/watchdog/flexisbc_wdt.c
+@@ -0,0 +1,34 @@
++#include <common.h>
++#include <watchdog.h>
++#include <asm/io.h>
++#include <asm/arch/imx-regs.h>
++#include <asm/arch/mx6-pins.h>
++#include <asm/mach-imx/iomux-v3.h>
++#include <asm/arch/gpio.h>
++#include <asm/gpio.h>
++
++#ifdef CONFIG_FLEXISBC_WATCHDOG
++
++#define HEARTBEAT_GPIO	IMX_GPIO_NR(3, 22)
++
++void hw_watchdog_reset(void)
++{
++	gpio_set_value(HEARTBEAT_GPIO, 1);
++	/* 
++	 * FIXME: There should be 5ms pause, but currently it slows down boot
++	 *        process. It works as it is, so leave it for now...
++	 */
++	gpio_set_value(HEARTBEAT_GPIO, 0);
++}
++
++void hw_watchdog_init(void)
++{
++	/* FIXME: setup has to be done in apalis_imx6.c as it doesn't work here */
++#ifdef foobar
++	static iomux_v3_cfg_t hb_pad = MX6_PAD_EIM_D22__GPIO3_IO22 | MUX_PAD_CTRL(NO_PAD_CTRL);
++	imx_iomux_v3_setup_pad(hb_pad);
++	gpio_direction_output(HEARTBEAT_GPIO, 0);
++#endif
++	hw_watchdog_reset();
++}
++#endif
+-- 
+1.9.1
+
