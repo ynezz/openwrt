@@ -223,4 +223,19 @@ define Device/apalis
 endef
 TARGET_DEVICES += apalis
 
+define Device/apalis_flexisbc
+  $(Device/apalis)
+  DEVICE_TITLE := Gaben FlexiSBC
+  SUPPORTED_DEVICES := apalis,flexisbc
+  DEVICE_DTS := imx6q-apalis-gaben-flexisbc
+  BOOT_SCRIPT := bootscript-apalis_flexisbc
+  UBOOT := apalis_gaben_flexisbc
+  DEVICE_PACKAGES := \
+	kmod-can kmod-can-flexcan kmod-can-raw \
+	kmod-leds-gpio kmod-pps-gpio kmod-rtc-ds1307 \
+	kmod-ledtrig-heartbeat kmod-gpio-mcp23s08 \
+	kmod-input-gpio-keys kmod-hwmon-lm75 kmod-input-evdev
+endef
+TARGET_DEVICES += apalis_flexisbc
+
 $(eval $(call BuildImage))

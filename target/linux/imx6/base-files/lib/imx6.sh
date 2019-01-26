@@ -95,6 +95,10 @@ imx6_board_detect() {
 		name="apalis,eval"
 		;;
 
+	"Toradex Apalis iMX6Q/D Module on Gaben Flexi SBC")
+		name="apalis,flexisbc"
+		;;
+
 	"Wandboard i.MX6 Dual Lite Board")
 		name="wandboard"
 		;;
