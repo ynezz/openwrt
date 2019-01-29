@@ -1,0 +1,90 @@
+#!/bin/sh /etc/rc.common
+
+START=97
+
+load_gadget() {
+	local name
+	local type
+	local manufacturer
+	local product
+	local serial_number
+	local usb_vid
+	local usb_pid
+	local udc_dev
+	local disabled
+
+	config_get disabled $1 disabled
+	[ "$disabled" = "1" ] && return
+
+	config_get usb_vid $1 usb_vid
+	config_get usb_pid $1 usb_pid
+	config_get udc_dev $1 udc_dev
+	[ -z "$usb_vid" -o -z "$usb_pid" -o -z "$udc_dev" ] && return
+
+	config_get type $1 type "acm"
+	config_get name $1 name "${usb_vid}-acm"
+	config_get manufacturer $1 manufacturer "OpenWrt"
+	config_get product $1 product "OpenWrt USB ${type}"
+	config_get serial_number $1 serial_number "1922"
+
+	local path="/sys/kernel/config/usb_gadget/$name"
+	mkdir -p "$path"
+	echo "$usb_vid" > "$path/idVendor"
+	echo "$usb_pid" > "$path/idProduct"
+
+	local strings="$path/strings/0x409"
+	mkdir -p "$strings"
+	echo "$product" > "$strings/product"
+	echo "$manufacturer" > "$strings/manufacturer"
+	echo "$serial_number" > "$strings/serialnumber"
+
+	mkdir -p "$path/configs/$name.1"
+
+	case "$type" in
+	"acm")
+		mkdir -p "$path/functions/acm.0"
+		ln -sf "$path/functions/acm.0" "$path/configs/$name.1"
+		;;
+	"acm+rndis")
+		mkdir -p "$path/functions/acm.0"
+		mkdir -p "$path/functions/rndis.0"
+		ln -sf "$path/functions/acm.0" "$path/configs/$name.1"
+		ln -sf "$path/functions/rndis.0" "$path/configs/$name.1"
+		;;
+	esac
+
+	echo "$udc_dev" > "$path/UDC"
+}
+
+unload_gadget() {
+	local name
+	local usb_vid
+	local udc_dev
+	local disabled
+
+	config_get disabled $1 disabled
+	[ "$disabled" = "1" ] && return
+
+	config_get usb_vid $1 usb_vid
+	config_get udc_dev $1 udc_dev
+	[ -z "$usb_vid" -o -z "$udc_dev" ] && return
+
+	config_get name $1 name "${usb_vid}-acm"
+	[ -d "/sys/kernel/config/usb_gadget/$name" ] || return
+	echo '' > "/sys/kernel/config/usb_gadget/$name/UDC" > /dev/null
+}
+
+stop() {
+	[ -e /sys/kernel/config/usb_gadget ] || exit 0
+	config_load usbgadget
+	config_foreach unload_gadget gadget
+}
+
+start() {
+	grep -q configfs /proc/modules || exit 0
+	grep -q configfs /proc/mounts || mount -t configfs none /sys/kernel/config
+	[ -e /sys/kernel/config/usb_gadget ] || exit 0
+
+	config_load usbgadget
+	config_foreach load_gadget gadget
+}
