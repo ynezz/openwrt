@@ -1,0 +1,131 @@
+From 8be2f132b705013e7938d03894aefac03d5983ed Mon Sep 17 00:00:00 2001
+From: Alban Bedel <albeu@free.fr>
+Date: Sun, 25 Mar 2018 00:24:57 +0100
+Subject: [PATCH] nvmem: Update the OF binding to use a subnode for the cells
+ list
+
+Having the cells as subnodes of the provider device without any
+compatible property might clash with other bindings. To avoid this
+problem update the binding to have all the cells in a 'nvmem-cells'
+subnode with a 'nvmem-cells' compatible string. This new binding
+guarantee that we can turn any kind of device in a nvmem provider.
+
+While discouraged for new uses the old scheme is still supported for
+backward compatibility.
+
+Signed-off-by: Alban Bedel <albeu@free.fr>
+---
+ Documentation/devicetree/bindings/nvmem/nvmem.txt | 63 +++++++++++++++--------
+ drivers/nvmem/core.c                              | 10 ++++
+ 2 files changed, 52 insertions(+), 21 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/nvmem/nvmem.txt b/Documentation/devicetree/bindings/nvmem/nvmem.txt
+index b52bc11..51bb3ca 100644
+--- a/Documentation/devicetree/bindings/nvmem/nvmem.txt
++++ b/Documentation/devicetree/bindings/nvmem/nvmem.txt
+@@ -11,14 +11,29 @@ these data from, and where they are stored on the storage device.
+ This document is here to document this.
+ 
+ = Data providers =
+-Contains bindings specific to provider drivers and data cells as children
+-of this node.
++A data provider should have a subnode named 'nvmem-cells' that contains
++a subnodes for each data cells.
++
++For backward compatibility the nvmem data cells can be direct children
++of the data provider. This use is discouraged as it can conflict with
++other bindings.
+ 
+ Optional properties:
+  read-only: Mark the provider as read only.
+ 
++= Data cells list =
++The data cells list node should be named 'nvmem-cells' and have a
++child node for each data cell.
++
++Required properties:
++ compatible: Must be "nvmem-cells"
++ #address-cells: <1> if the provider use 32 bit addressing,
++                 <2> for 64 bits addressing
++ #size-cells: <1> if the provider use 32 bit sizes,
++              <2> for 64 bits sizes
++
+ = Data cells =
+-These are the child nodes of the provider which contain data cell
++These are the child nodes of the nvmem-cells node which contain data cell
+ information like offset and size in nvmem provider.
+ 
+ Required properties:
+@@ -37,24 +52,30 @@ For example:
+ 		...
+ 
+ 		/* Data cells */
+-		tsens_calibration: calib@404 {
+-			reg = <0x404 0x10>;
+-		};
+-
+-		tsens_calibration_bckp: calib_bckp@504 {
+-			reg = <0x504 0x11>;
+-			bits = <6 128>
+-		};
+-
+-		pvs_version: pvs-version@6 {
+-			reg = <0x6 0x2>
+-			bits = <7 2>
+-		};
+-
+-		speed_bin: speed-bin@c{
+-			reg = <0xc 0x1>;
+-			bits = <2 3>;
+-
++		nvmem-cells {
++			compatible = "nvmem-cells";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			tsens_calibration: calib@404 {
++				reg = <0x404 0x10>;
++			};
++
++			tsens_calibration_bckp: calib_bckp@504 {
++				reg = <0x504 0x11>;
++				bits = <6 128>
++			};
++
++			pvs_version: pvs-version@6 {
++				reg = <0x6 0x2>
++				bits = <7 2>
++			};
++
++			speed_bin: speed-bin@c{
++				reg = <0xc 0x1>;
++				bits = <2 3>;
++
++			};
+ 		};
+ 		...
+ 	};
+diff --git a/drivers/nvmem/core.c b/drivers/nvmem/core.c
+index 635886e..76d1339 100644
+--- a/drivers/nvmem/core.c
++++ b/drivers/nvmem/core.c
+@@ -788,6 +788,16 @@ struct nvmem_cell *of_nvmem_cell_get(struct device_node *np,
+ 	if (!nvmem_np)
+ 		return ERR_PTR(-EINVAL);
+ 
++	/* Devices using the new binding have all the cells in
++	 * a subnode with compatible = "nvmem-cells". In this
++	 * case the device will be the parent of this node.
++	 */
++	if (of_device_is_compatible(nvmem_np, "nvmem-cells")) {
++		nvmem_np = of_get_next_parent(nvmem_np);
++		if (!nvmem_np)
++			return ERR_PTR(-EINVAL);
++	}
++
+ 	nvmem = __nvmem_device_get(nvmem_np, NULL, NULL);
+ 	of_node_put(nvmem_np);
+ 	if (IS_ERR(nvmem))
+-- 
+1.9.1
+

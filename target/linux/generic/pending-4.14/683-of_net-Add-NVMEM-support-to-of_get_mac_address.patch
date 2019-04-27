@@ -1,0 +1,135 @@
+From 5ea133a9a158506663ddd71888792e1bd6d1861c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Thu, 18 Apr 2019 00:45:02 +0200
+Subject: [PATCH] of_net: Add NVMEM support to of_get_mac_address
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Many embedded devices have information such as MAC addresses stored
+inside NVMEMs like EEPROMs and so on. Currently there are only two
+drivers in the tree which benefit from NVMEM bindings.
+
+Adding support for NVMEM into every other driver would mean adding a lot
+of repetitive code. This patch allows us to configure MAC addresses in
+various devices like ethernet and wireless adapters directly from
+of_get_mac_address, which is already used by almost every driver in the
+tree.
+
+Predecessor of this patch which used directly MTD layer has originated
+in OpenWrt some time ago and supports already about 497 use cases in 357
+device tree files.
+
+Signed-off-by: Felix Fietkau <nbd@nbd.name>
+Signed-off-by: John Crispin <john@phrozen.org>
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ drivers/of/of_net.c | 66 +++++++++++++++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 61 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/of/of_net.c b/drivers/of/of_net.c
+index d3065ce..c415cd8 100644
+--- a/drivers/of/of_net.c
++++ b/drivers/of/of_net.c
+@@ -8,8 +8,10 @@
+ #include <linux/etherdevice.h>
+ #include <linux/kernel.h>
+ #include <linux/of_net.h>
++#include <linux/of_platform.h>
+ #include <linux/phy.h>
+ #include <linux/export.h>
++#include <linux/device.h>
+ #include <linux/mtd/mtd.h>
+ 
+ /**
+@@ -121,12 +123,59 @@ static const void *of_get_mac_address_mtd(struct device_node *np)
+ 	return NULL;
+ }
+ 
++static const void *of_get_mac_addr_nvmem(struct device_node *np)
++{
++	int ret;
++	u8 mac[ETH_ALEN];
++	struct property *pp;
++	struct platform_device *pdev = of_find_device_by_node(np);
++
++	if (!pdev)
++		return ERR_PTR(-ENODEV);
++
++	ret = nvmem_get_mac_address(&pdev->dev, &mac);
++	if (ret)
++		return ERR_PTR(ret);
++
++	pp = devm_kzalloc(&pdev->dev, sizeof(*pp), GFP_KERNEL);
++	if (!pp)
++		return ERR_PTR(-ENOMEM);
++
++	pp->name = "nvmem-mac-address";
++	pp->length = ETH_ALEN;
++	pp->value = devm_kmemdup(&pdev->dev, mac, ETH_ALEN, GFP_KERNEL);
++	if (!pp->value) {
++		ret = -ENOMEM;
++		goto free;
++	}
++
++	ret = of_add_property(np, pp);
++	if (ret)
++		goto free;
++
++	return pp->value;
++free:
++	devm_kfree(&pdev->dev, pp->value);
++	devm_kfree(&pdev->dev, pp);
++
++	return ERR_PTR(ret);
++}
++
++static inline bool of_has_nvmem_mac_addr(struct device_node *np)
++{
++	int index = of_property_match_string(np, "nvmem-cell-names",
++					     "mac-address");
++	return of_parse_phandle(np, "nvmem-cells", index) != NULL;
++}
++
+ /**
+  * Search the device tree for the best MAC address to use.  'mac-address' is
+  * checked first, because that is supposed to contain to "most recent" MAC
+  * address. If that isn't set, then 'local-mac-address' is checked next,
+- * because that is the default address.  If that isn't set, then the obsolete
+- * 'address' is checked, just in case we're using an old device tree.
++ * because that is the default address. If that isn't set, then the obsolete
++ * 'address' is checked, just in case we're using an old device tree. If any
++ * of the above isn't set, then try to get MAC address from nvmem cell named
++ * 'mac-address'.
+  *
+  * Note that the 'address' property is supposed to contain a virtual address of
+  * the register set, but some DTS files have redefined that property to be the
+@@ -139,8 +188,8 @@ static const void *of_get_mac_address_mtd(struct device_node *np)
+  * this case, the real MAC is in 'local-mac-address', and 'mac-address' exists
+  * but is all zeros.
+  *
+- * If a mtd-mac-address property exists, try to fetch the MAC address from the
+- * specified mtd device, and store it as a 'mac-address' property
++ * Return: Will be a valid pointer on success, NULL in case there wasn't
++ *         'mac-address' nvmem cell node found, and ERR_PTR in case of error.
+ */
+ const void *of_get_mac_address(struct device_node *np)
+ {
+@@ -158,6 +207,13 @@ const void *of_get_mac_address(struct device_node *np)
+ 	if (addr)
+ 		return addr;
+ 
+-	return of_get_mac_addr(np, "address");
++	addr = of_get_mac_addr(np, "address");
++	if (addr)
++		return addr;
++
++	if (!of_has_nvmem_mac_addr(np))
++		return NULL;
++
++	return of_get_mac_addr_nvmem(np);
+ }
+ EXPORT_SYMBOL(of_get_mac_address);
+-- 
+1.9.1
+

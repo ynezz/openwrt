@@ -1,0 +1,40 @@
+From 51d1095b4db38d3f323d1db2f6b3f547c460f3d8 Mon Sep 17 00:00:00 2001
+From: Bartosz Golaszewski <bgolaszewski@baylibre.com>
+Date: Fri, 30 Nov 2018 11:53:25 +0000
+Subject: [PATCH 5/5] nvmem: add new config option
+
+We want to add nvmem support for MTD. TI DaVinci is the first platform
+that will be using it, but only in non-DT mode. In order not to
+introduce any new interface to supporting of which we would have to
+commit - add a new config option that tells nvmem not to use the DT
+node of the parent device.
+
+This way we won't be creating nvmem devices corresponding with MTD
+partitions defined in device tree. By default MTD will set this new
+field to true.
+
+Once a set of bindings for MTD nvmem cells is agreed upon, we'll be
+able to remove this option.
+
+Signed-off-by: Bartosz Golaszewski <bgolaszewski@baylibre.com>
+Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ include/linux/nvmem-provider.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/linux/nvmem-provider.h b/include/linux/nvmem-provider.h
+index 497706f..5707f37 100644
+--- a/include/linux/nvmem-provider.h
++++ b/include/linux/nvmem-provider.h
+@@ -31,6 +31,7 @@ struct nvmem_config {
+ 	int			ncells;
+ 	bool			read_only;
+ 	bool			root_only;
++	bool			no_of_node;
+ 	nvmem_reg_read_t	reg_read;
+ 	nvmem_reg_write_t	reg_write;
+ 	int	size;
+-- 
+1.9.1
+
