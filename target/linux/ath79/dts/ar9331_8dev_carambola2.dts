@@ -104,6 +104,24 @@
 				label = "art";
 				reg = <0xff0000 0x010000>;
 				read-only;
+
+				nvmem-cells {
+					compatible = "nvmem-cells";
+					#address-cells = <1>;
+					#size-cells = <1>;
+
+					eth0_addr: eth-mac-addr@0 {
+						reg = <0x0 0x6>;
+					};
+
+					eth1_addr: eth-mac-addr@6 {
+						reg = <0x6 0x6>;
+					};
+
+					wmac_addr: wifi-mac-addr@1002 {
+						reg = <0x1002 0x6>;
+					};
+				};
 			};
 		};
 	};
@@ -115,7 +133,9 @@
 
 &eth0 {
 	status = "okay";
-	mtd-mac-address = <&art 0x0>;
+
+	nvmem-cells = <&eth0_addr>;
+	nvmem-cell-names = "mac-address";
 
 	gmac-config {
 		device = <&gmac>;
@@ -127,11 +147,16 @@
 
 &eth1 {
 	status = "okay";
-	mtd-mac-address = <&art 0x6>;
+
+	nvmem-cells = <&eth1_addr>;
+	nvmem-cell-names = "mac-address";
 };
 
 &wmac {
 	status = "okay";
+
 	mtd-cal-data = <&art 0x1000>;
-	mtd-mac-address = <&art 0x1002>;
+
+	nvmem-cells = <&eth1_addr>;
+	nvmem-cell-names = "mac-address";
 };
