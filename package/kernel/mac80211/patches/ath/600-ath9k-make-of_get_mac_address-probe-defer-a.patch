@@ -1,0 +1,37 @@
+From c6b5bedaff1d9ea2483fa9e9ff7cde34e99b1dae Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Tue, 30 Apr 2019 11:08:09 +0200
+Subject: [PATCH] wireless: ath9k: make of_get_mac_address probe defer
+ aware
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+of_get_mac_address now uses NVMEM under the hood, so it could now return
+EPROBE_DEFER and it needs to be handled, which means, that it needs to
+be propagated back to the device driver subsystem in order to be handled
+as designed.
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ drivers/net/wireless/ath/ath9k/init.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/net/wireless/ath/ath9k/init.c b/drivers/net/wireless/ath/ath9k/init.c
+index 98141b6..c0da4af 100644
+--- a/drivers/net/wireless/ath/ath9k/init.c
++++ b/drivers/net/wireless/ath/ath9k/init.c
+@@ -642,7 +642,9 @@ static int ath9k_of_init(struct ath_softc *sc)
+ 	}
+ 
+ 	mac = of_get_mac_address(np);
+-	if (mac)
++	if (PTR_ERR(mac) == -EPROBE_DEFER)
++		return -EPROBE_DEFER;
++	else if (!IS_ERR_OR_NULL(mac))
+ 		ether_addr_copy(common->macaddr, mac);
+ 
+ 	return 0;
+-- 
+1.9.1
+
