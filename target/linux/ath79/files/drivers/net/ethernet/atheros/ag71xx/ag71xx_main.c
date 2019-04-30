@@ -1468,9 +1468,11 @@ static int ag71xx_probe(struct platform_device *pdev)
 	ag->stop_desc->next = (u32) ag->stop_desc_dma;
 
 	mac_addr = of_get_mac_address(np);
-	if (mac_addr)
+	if (PTR_ERR(mac_addr) == -EPROBE_DEFER) {
+		return -EPROBE_DEFER;
+	} else if (!IS_ERR_OR_NULL(mac_addr)) {
 		memcpy(dev->dev_addr, mac_addr, ETH_ALEN);
-	if (!mac_addr || !is_valid_ether_addr(dev->dev_addr)) {
+	} else {
 		dev_err(&pdev->dev, "invalid MAC address, using random address\n");
 		eth_random_addr(dev->dev_addr);
 	}
