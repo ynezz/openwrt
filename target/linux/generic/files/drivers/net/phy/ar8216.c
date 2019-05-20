@@ -23,6 +23,8 @@
 #include <linux/skbuff.h>
 #include <linux/netdevice.h>
 #include <linux/netlink.h>
+#include <linux/gpio.h>
+#include <linux/of_gpio.h>
 #include <linux/of_device.h>
 #include <linux/of_mdio.h>
 #include <linux/of_net.h>
@@ -2750,6 +2752,41 @@ static const struct of_device_id ar8xxx_mdiodev_of_match[] = {
 	{ /* sentinel */ },
 };
 
+static void
+ar8xxx_gpio_reset(struct ar8xxx_priv *priv)
+{
+	int ret;
+	int gpio;
+	bool active_low;
+	enum of_gpio_flags flags;
+
+	gpio = of_get_named_gpio_flags(priv->pdev->of_node, "reset-gpio", 0, &flags);
+	if (!gpio_is_valid(gpio))
+		return;
+
+	active_low = flags & OF_GPIO_ACTIVE_LOW;
+	ret = devm_gpio_request_one(priv->pdev, gpio,
+				    active_low ? GPIOF_OUT_INIT_LOW : GPIOF_OUT_INIT_HIGH,
+				    "ar8xxx reset");
+	if (ret < 0) {
+		pr_err("ar8327: unable to claim reset-gpio: %d\n", ret);
+		return;
+	}
+
+	/* TODO: debug only, remove! */
+	{
+		int val = gpio_get_value_cansleep(gpio);
+		pr_info("ar8xxx: reset-gpio is %s, setting to %s after 15ms\n",
+			val ? "HIGH" : "LOW",
+			!!active_low ? "HIGH" : "LOW");
+	}
+
+	usleep_range(15 * 1000, 15 * 1000 + 1000);
+	gpio_set_value_cansleep(gpio, !!active_low);
+
+	pr_info("ar8xxx: gpio reset done\n");
+}
+
 static int
 ar8xxx_mdiodev_probe(struct mdio_device *mdiodev)
 {
@@ -2775,6 +2812,8 @@ ar8xxx_mdiodev_probe(struct mdio_device *mdiodev)
 				   &priv->mib_poll_interval);
 	if (ret)
 		priv->mib_poll_interval = 0;
+
+	ar8xxx_gpio_reset(priv);
 
 	ret = ar8xxx_read_id(priv);
 	if (ret)
