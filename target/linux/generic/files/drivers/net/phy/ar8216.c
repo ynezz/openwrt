@@ -2748,6 +2748,9 @@ static const struct of_device_id ar8xxx_mdiodev_of_match[] = {
 	}, {
 		.compatible = "qca,ar8327",
 		.data = &ar8327_chip,
+	}, {
+		.compatible = "qca,qca8337",
+		.data = &ar8337_chip,
 	},
 	{ /* sentinel */ },
 };
