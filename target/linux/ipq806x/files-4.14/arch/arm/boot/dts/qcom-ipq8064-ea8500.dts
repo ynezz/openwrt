@@ -40,9 +40,6 @@
 	soc {
 		pinmux@800000 {
 
-			pinctrl-0 = <&switch_reset>;
-			pinctrl-names = "default";
-
 			button_pins: button_pins {
 				mux {
 					pins = "gpio65", "gpio67", "gpio68";
@@ -307,9 +304,15 @@
 			gpios = <&qcom_pinmux 1 GPIO_ACTIVE_HIGH &qcom_pinmux 0 GPIO_ACTIVE_HIGH>;
 			pinctrl-0 = <&mdio0_pins>;
 			pinctrl-names = "default";
+
 			switch0@18 {
 				compatible = "qca,qca8337";
 				reg = <0x18>;
+
+				pinctrl-0 = <&switch_reset>;
+				pinctrl-names = "reset";
+				reset-gpio = <&qcom_pinmux 63 GPIO_ACTIVE_LOW>;
+
 				qca,ar8327-initvals = <
 					0x00004 0x7600000   /* PAD0_MODE */
 					0x00008 0x1000000   /* PAD5_MODE */
