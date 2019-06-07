@@ -1,0 +1,37 @@
+From fe44d9abfeeb1607c674ae009f48f8279b5b83e0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Mon, 10 Jun 2019 07:46:04 +0200
+Subject: [PATCH] mdio-bus: debug printk and usleep_range
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ drivers/net/phy/mdio_bus.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/net/phy/mdio_bus.c b/drivers/net/phy/mdio_bus.c
+index c545fb1f82bd..1676ac99e6fa 100644
+--- a/drivers/net/phy/mdio_bus.c
++++ b/drivers/net/phy/mdio_bus.c
+@@ -362,8 +362,15 @@ int __mdiobus_register(struct mii_bus *bus, struct module *owner)
+ 	} else	if (gpiod) {
+ 		bus->reset_gpiod = gpiod;
+ 
++		pr_info("toggling reset gpio\n");
++
+ 		gpiod_set_value_cansleep(gpiod, 1);
+-		udelay(bus->reset_delay_us);
++
++		if (bus->reset_delay_us < 10)
++			udelay(bus->reset_delay_us);
++		else
++			usleep_range(bus->reset_delay_us, bus->reset_delay_us + 1000);
++
+ 		gpiod_set_value_cansleep(gpiod, 0);
+ 	}
+ 
+-- 
+1.9.1
+

@@ -40,9 +40,6 @@
 	soc {
 		pinmux@800000 {
 
-			pinctrl-0 = <&switch_reset>;
-			pinctrl-names = "default";
-
 			button_pins: button_pins {
 				mux {
 					pins = "gpio65", "gpio67", "gpio68";
@@ -304,9 +301,14 @@
 			compatible = "virtual,mdio-gpio";
 			#address-cells = <1>;
 			#size-cells = <0>;
+
 			gpios = <&qcom_pinmux 1 GPIO_ACTIVE_HIGH &qcom_pinmux 0 GPIO_ACTIVE_HIGH>;
-			pinctrl-0 = <&mdio0_pins>;
+
+			pinctrl-0 = <&mdio0_pins &switch_reset>;
 			pinctrl-names = "default";
+
+			reset-gpios = <&qcom_pinmux 63 GPIO_ACTIVE_LOW>;
+			reset-delay-us = <12000>;
 
 			phy0: ethernet-phy@0 {
 				reg = <0>;
