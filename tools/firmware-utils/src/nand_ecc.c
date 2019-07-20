@@ -188,7 +188,11 @@ int main(int argc, char **argv)
 			nand_calculate_ecc(page_data + j * 256, ecc_data);
 			ecc_data += 3;
 		}
-		write(outfd, page_data, page_size + oob_size);
+
+		if (write(outfd, page_data, page_size + oob_size) < 0) {
+			perror("write output file\n");
+			goto out;
+		}
 	}
 
 	ret = 0;
