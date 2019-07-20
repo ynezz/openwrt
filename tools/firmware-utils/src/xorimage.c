@@ -52,18 +52,18 @@ void usage(void)
 
 int main(int argc, char **argv)
 {
-	char buf[1024];	/* keep this at 1k or adjust garbage calc below */
+	uint8_t buf[1024];	/* keep this at 1k or adjust garbage calc below */
 	FILE *in = stdin;
 	FILE *out = stdout;
 	char *ifn = NULL;
 	char *ofn = NULL;
 	const char *pattern = default_pattern;
-	char hex_pattern[128];
+	uint8_t hex_pattern[128];
 	unsigned int hex_buf;
 	int c;
-	int v0, v1, v2;
 	size_t n;
-	int p_len, p_off = 0;
+	size_t p_len;
+	int p_off = 0;
 
 	while ((c = getopt(argc, argv, "i:o:p:xh")) != -1) {
 		switch (c) {
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 	}
 
 	if (is_hex_pattern) {
-		int i;
+		unsigned int i;
 
 		if ((p_len / 2) > sizeof(hex_pattern)) {
 			fprintf(stderr, "provided hex pattern is too long\n");
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
 			p_off = xor_data(buf, n, hex_pattern, (p_len / 2),
 					 p_off);
 		} else {
-			p_off = xor_data(buf, n, pattern, p_len, p_off);
+			p_off = xor_data(buf, n, (uint8_t*) pattern, p_len, p_off);
 		}
 
 		if (!fwrite(buf, n, 1, out)) {
