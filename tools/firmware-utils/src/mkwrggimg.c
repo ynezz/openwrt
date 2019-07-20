@@ -38,7 +38,7 @@
 #define WRGG03_MAGIC	0x20080321
 
 struct wrgg03_header {
-	char		signature[32];
+	uint8_t		signature[32];
 	uint32_t	magic1;
 	uint32_t	magic2;
 	char		version[16];
@@ -49,7 +49,7 @@ struct wrgg03_header {
 	uint32_t	size;
 	uint32_t	offset;
 	char		devname[32];
-	char		digest[16];
+	uint8_t		digest[16];
 } __attribute__ ((packed));
 
 static char *progname;
@@ -230,8 +230,8 @@ int main(int argc, char *argv[])
 	}
 
 	errno = 0;
-	fread(buf + sizeof(struct wrgg03_header), st.st_size, 1, infile);
-	if (errno != 0) {
+	ssize_t r = fread(buf + sizeof(struct wrgg03_header), st.st_size, 1, infile);
+	if (r != 1 || errno != 0) {
 		ERRS("unable to read from file %s", ifname);
 		goto close_in;
 	}
@@ -239,17 +239,17 @@ int main(int argc, char *argv[])
 	header = (struct wrgg03_header *) buf;
 	memset(header, '\0', sizeof(struct wrgg03_header));
 
-	strncpy(header->signature, signature, sizeof(header->signature));
+	memcpy(header->signature, signature, sizeof(header->signature));
 	put_u32(&header->magic1, WRGG03_MAGIC, 0);
 	put_u32(&header->magic2, WRGG03_MAGIC, 0);
-	strncpy(header->version, version, sizeof(header->version));
-	strncpy(header->model, model, sizeof(header->model));
+	memcpy(header->version, version, sizeof(header->version));
+	memcpy(header->model, model, sizeof(header->model));
 	put_u32(&header->flag, flag, 0);
 	put_u32(&header->reserve, reserve, 0);
-	strncpy(header->buildno, buildno, sizeof(header->buildno));
+	memcpy(header->buildno, buildno, sizeof(header->buildno));
 	put_u32(&header->size, st.st_size, big_endian);
 	put_u32(&header->offset, offset, big_endian);
-	strncpy(header->devname, devname, sizeof(header->devname));
+	memcpy(header->devname, devname, sizeof(header->devname));
 
 	get_digest(header, buf + sizeof(struct wrgg03_header), st.st_size);
 
