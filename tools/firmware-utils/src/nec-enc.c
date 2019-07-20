@@ -31,7 +31,7 @@ xor_pattern(uint8_t *data, size_t len, const char *key, int k_len, int k_off)
 
 static void xor_data(uint8_t *data, size_t len, const uint8_t *pattern)
 {
-	for (int i = 0; i < len; i++) {
+	for (unsigned int i = 0; i < len; i++) {
 		*data ^= pattern[i];
 		data++;
 	}
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
 	}
 
 	while ((n = fread(buf, 1, sizeof(buf), in)) > 0) {
-		for (int i = 0; i < n; i++) {
+		for (unsigned int i = 0; i < n; i++) {
 			buf_pattern[i] = ptn + 1;
 			ptn++;
 
