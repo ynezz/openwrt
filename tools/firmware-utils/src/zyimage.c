@@ -7,8 +7,14 @@
  *
  */
 
+#ifndef _POSIX_SOURCE
 #define _POSIX_SOURCE
+#endif
+
+#ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 199309L /* getopt */
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -128,8 +134,15 @@ int main(int argc, char *argv[]) {
   f = fopen(argv[optind], "r+");
   if (f != NULL)
   {
+    size_t r;
+
     fseek(f, sizeof(sign)*-1, SEEK_END);
-    fread(&oldsign, sizeof(oldsign), 1, f);
+    r = fread(&oldsign, sizeof(oldsign), 1, f);
+    if (r != 1)
+    {
+      printf("Failed to read oldsign\n");
+      exit(0);
+    }
 
     if (strncmp(oldsign.magic,"ZNBG", sizeof(oldsign.magic)) == 0 )
     {
