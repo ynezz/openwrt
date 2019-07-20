@@ -143,7 +143,7 @@ int main(int argc, char **argv)
 	{
 		const char *ugh = NULL;
 
-		if (len < sizeof(struct motorola)) {
+		if (len < (off_t) sizeof(struct motorola)) {
 			ugh = "input file too short";
 		} else {
 			const struct model *m;
@@ -169,15 +169,15 @@ int main(int argc, char **argv)
 			exit(3);
 		} else {
 			// all is well, write the file without the prefix
+			ssize_t towrite = len - sizeof(struct motorola);
 			if ((fd = open(argv[3], O_CREAT|O_WRONLY|O_TRUNC,0644)) < 0
-			|| write(fd, trx + sizeof(struct motorola), len - sizeof(struct motorola)) !=  len - sizeof(struct motorola)
+			|| write(fd, trx + sizeof(struct motorola), towrite) != towrite
 			|| close(fd) < 0)
 			{
 				fprintf(stderr, "Error storing file %s: %s\n", argv[3], strerror(errno));
 				exit(2);
 			}
 		}
-		
 	} else {
 		// setup the firmware flags magic number
 		const struct model *m;
@@ -210,8 +210,9 @@ int main(int argc, char **argv)
 		firmware->crc = htonl(crc32buf((unsigned char *)&firmware->flags, sizeof(firmware->flags) + len));
 
 		// write the firmware
+		ssize_t towrite = sizeof(struct motorola) + len;
 		if ((fd = open(argv[3], O_CREAT|O_WRONLY|O_TRUNC,0644)) < 0
-		|| write(fd, firmware, sizeof(struct motorola) + len) != sizeof(struct motorola) + len
+		|| write(fd, firmware, towrite) != towrite
 		|| close(fd) < 0)
 		{
 			fprintf(stderr, "Error storing file %s: %s\n", argv[3], strerror(errno));
