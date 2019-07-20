@@ -101,8 +101,8 @@ int read_to_buf(const struct file_info *fdata, char *buf)
 	}
 
 	errno = 0;
-	fread(buf, fdata->file_size, 1, f);
-	if (errno != 0) {
+	ssize_t r = fread(buf, fdata->file_size, 1, f);
+	if (r != 1 || errno != 0) {
 		ERRS("unable to read from file \"%s\"", fdata->file_name);
 		goto out_close;
 	}
@@ -124,7 +124,7 @@ static int pad_jffs2(char *buf, int currlen, int maxlen)
 	pad_mask = (4 * 1024) | (64 * 1024);	/* EOF at 4KB and at 64KB */
 	while ((len < maxlen) && (pad_mask != 0)) {
 		uint32_t mask;
-		int i;
+		unsigned int i;
 
 		for (i = 10; i < 32; i++) {
 			mask = 1 << i;

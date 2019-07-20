@@ -365,8 +365,8 @@ void fill_header(char *buf, int len)
 	memset(hdr, 0, sizeof(struct fw_header));
 
 	hdr->version = htonl(hdr_ver);
-	strncpy(hdr->vendor_name, vendor, sizeof(hdr->vendor_name));
-	strncpy(hdr->fw_version, version, sizeof(hdr->fw_version));
+	memcpy(hdr->vendor_name, vendor, sizeof(hdr->vendor_name));
+	memcpy(hdr->fw_version, version, sizeof(hdr->fw_version));
 	hdr->hw_id = htonl(hw_id);
 	hdr->hw_rev = htonl(hw_rev);
 
