@@ -107,7 +107,7 @@ static uint32_t crc32tab[256] = {
 
 #define IMAGETAG_MAGIC1_TCOM		"AAAAAAAA Corporatio"
 
-static char fake_data[] = {
+static uint8_t fake_data[] = {
         0x18, 0x21, 0x21, 0x18, 0x21, 0x21, 0x21, 0x21, 0x21, 0x21, 0x21 ,0x18,
         0x21, 0x24, 0x21, 0x1b, 0x18, 0x18, 0x24, 0x24, 0x18, 0x21, 0x21, 0x21,
         0x21, 0x21, 0x21, 0x21, 0x1b, 0x18, 0x18, 0x24, 0x24, 0x21, 0x21, 0x21,
@@ -161,13 +161,12 @@ void usage(void)
 
 int main(int argc, char **argv)
 {
-	char buf[1024];	/* keep this at 1k or adjust garbage calc below */
+	uint8_t buf[1024];	/* keep this at 1k or adjust garbage calc below */
 	FILE *in = stdin;
 	FILE *out = stdout;
 	char *ifn = NULL;
 	char *ofn = NULL;
 	int c;
-	int v0, v1, v2;
 	size_t n;
 	int first_block = 1;
 
