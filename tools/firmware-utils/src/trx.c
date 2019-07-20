@@ -135,6 +135,7 @@ int main(int argc, char **argv)
 				break;
 			case 'F':
 				fsmark = cur_len;
+				/* fall through */
 			case 'A':
 				append = 1;
 				/* fall through */
