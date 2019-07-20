@@ -36,13 +36,13 @@
 #define WRG_MAGIC	0x20040220
 
 struct wrg_header {
-	char		signature[32];
+	uint8_t		signature[32];
 	uint32_t	magic1;
 	uint32_t	magic2;
 	uint32_t	size;
 	uint32_t	offset;
-	char		devname[32];
-	char		digest[16];
+	uint8_t		devname[32];
+	uint8_t		digest[16];
 } __attribute__ ((packed));
 
 static char *progname;
@@ -192,8 +192,8 @@ int main(int argc, char *argv[])
 	}
 
 	errno = 0;
-	fread(buf + sizeof(struct wrg_header), st.st_size, 1, infile);
-	if (errno != 0) {
+	ssize_t r = fread(buf + sizeof(struct wrg_header), st.st_size, 1, infile);
+	if (r != 1 || errno != 0) {
 		ERRS("unable to read from file %s", ifname);
 		goto close_in;
 	}
@@ -201,8 +201,8 @@ int main(int argc, char *argv[])
 	header = (struct wrg_header *) buf;
 	memset(header, '\0', sizeof(struct wrg_header));
 
-	strncpy(header->signature, signature, sizeof(header->signature));
-	strncpy(header->devname, dev_name, sizeof(header->signature));
+	memcpy(header->signature, signature, sizeof(header->signature));
+	memcpy(header->devname, dev_name, sizeof(header->signature));
 	put_u32(&header->magic1, WRG_MAGIC);
 	put_u32(&header->magic2, WRG_MAGIC);
 	put_u32(&header->size, st.st_size);
