@@ -127,7 +127,6 @@ static struct board_info *find_board(char *id)
 static void usage(int status)
 {
 	FILE *stream = (status != EXIT_SUCCESS) ? stderr : stdout;
-	struct board_info *board;
 
 	fprintf(stream, "Usage: %s [OPTIONS...]\n", progname);
 	fprintf(stream,
@@ -161,7 +160,7 @@ static int get_file_stat(struct file_info *fdata)
 	return 0;
 }
 
-static int read_to_buf(struct file_info *fdata, char *buf)
+static int read_to_buf(struct file_info *fdata, uint8_t *buf)
 {
 	FILE *f;
 	int ret = EXIT_FAILURE;
@@ -173,8 +172,8 @@ static int read_to_buf(struct file_info *fdata, char *buf)
 	}
 
 	errno = 0;
-	fread(buf, fdata->file_size, 1, f);
-	if (errno != 0) {
+	ssize_t r = fread(buf, fdata->file_size, 1, f);
+	if (r != 1 || errno != 0) {
 		ERRS("unable to read from file \"%s\"", fdata->file_name);
 		goto out_close;
 	}
@@ -238,7 +237,7 @@ static int check_options(void)
 	return 0;
 }
 
-static int write_fw(char *data, int len)
+static int write_fw(uint8_t *data, int len)
 {
 	FILE *f;
 	int ret = EXIT_FAILURE;
@@ -273,11 +272,9 @@ static int write_fw(char *data, int len)
 static int build_fw(void)
 {
 	int buflen;
-	char *buf;
-	char *p;
+	uint8_t *buf;
+	uint8_t *p;
 	int ret = EXIT_FAILURE;
-	int writelen = 0;
-	uint32_t crc;
 	struct fw_header *hdr;
 	struct fw_tail *tail;
 
@@ -361,10 +358,6 @@ static int build_fw(void)
 int main(int argc, char *argv[])
 {
 	int ret = EXIT_FAILURE;
-	int err;
-
-	FILE *outfile;
-
 	progname = basename(argv[0]);
 
 	while ( 1 ) {
