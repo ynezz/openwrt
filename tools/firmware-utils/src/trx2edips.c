@@ -111,8 +111,7 @@ int main(int argc, char *argv[])
 	FILE *fpIn = NULL;
 	FILE *fpOut = NULL;
 	struct edimax_header eh;
-	size_t res;
-	int length;
+	size_t length;
 
 	char *buf;
 	struct trx_header *p;
@@ -136,10 +135,14 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "malloc of buffers failed\n");
 		return EXIT_FAILURE;
 	}
-	
+
 	rewind(fpIn);
 	/* read the whole file*/
-	res = fread(buf, 1, length, fpIn);
+	size_t res = fread(buf, 1, length, fpIn);
+	if (res != length) {
+		fprintf(stderr, "'%s' read failure\n", argv[1]);
+		return EXIT_FAILURE;
+	}
 
 	p = (struct trx_header *)buf;
 	if (LOAD32_LE(p->magic) != TRX_MAGIC) {
