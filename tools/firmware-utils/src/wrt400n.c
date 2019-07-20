@@ -7,6 +7,7 @@
  *
  *	Author: Sandeep Mistry
  */
+#include <errno.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -90,7 +91,7 @@ static uint32_t crctab[257] =
 
 static uint32_t crc32(uint8_t* buf, uint32_t len)
 {
-	register int i;
+	register unsigned int i;
 	uint32_t sum;
 	register uint32_t s0;
 	s0 = ~0;
@@ -166,8 +167,8 @@ int main(int argc, char *argv[])
 	char*		outputfilename	= NULL;
 
 	// file sizes
-	uint32_t 	kernelsize 		= 0;
-	uint32_t 	rootfssize 		= 0;
+	ssize_t 	kernelsize 		= 0;
+	ssize_t 	rootfssize 		= 0;
 	uint32_t 	totalsize 		= 0;
 
 	// header flags
@@ -216,7 +217,7 @@ int main(int argc, char *argv[])
 	kernelchecksum = cyg_crc32_accumulate(0, kernelbuf, sizeof(kernelbuf));
 
 	// print out stats
-	printf("%s: size %d (0x%x), crc32 = 0x%x\n", kernelfilename, kernelsize, kernelsize, kernelchecksum);
+	printf("%s: size %ld (0x%lx), crc32 = 0x%x\n", kernelfilename, kernelsize, kernelsize, kernelchecksum);
 
 
 	// open the root fs ..
@@ -241,7 +242,7 @@ int main(int argc, char *argv[])
 	rootfschecksum = cyg_crc32_accumulate(0, rootfsbuf, sizeof(rootfsbuf));
 
 	// print out stats
-	printf("%s: size %d (0x%x), crc32 = 0x%x\n", rootfsfilename, rootfssize, rootfssize, rootfschecksum);
+	printf("%s: size %ld (0x%lx), crc32 = 0x%x\n", rootfsfilename, rootfssize, rootfssize, rootfschecksum);
 
 
 	// now for the header ...
@@ -307,9 +308,14 @@ int main(int argc, char *argv[])
 	if(outfd == -1)
 	{
 		printf("ERROR: opening '%s' for write\n", outputfilename);
+		return -1;
 	}
 
-	write(outfd, buf, totalsize);
+	ssize_t r = write(outfd, buf, totalsize);
+	if (r < 0) {
+		printf("ERROR: write '%s' error: %s (%d)\n", outputfilename, strerror(errno), errno);
+		return -1;
+	}
 
 done:
 	// close open fd's
