@@ -26,6 +26,8 @@
 #include <errno.h>
 #include <sys/stat.h>
 
+#define CLE_SIZE_MAX 17
+
 struct pc1_ctx {
 	unsigned short	ax;
 	unsigned short	bx;
@@ -41,7 +43,7 @@ struct pc1_ctx {
 	unsigned short	cfc;
 	unsigned short	cfd;
 	unsigned short	compte;
-	unsigned char	cle[17];
+	unsigned char	cle[CLE_SIZE_MAX];
 	short		c;
 };
 
@@ -167,7 +169,7 @@ static void pc1_init(struct pc1_ctx *pc1)
 	memset(pc1, 0, sizeof(struct pc1_ctx));
 
 	/* ('Remsaalps!123456') is the key used, you can change it */
-	strcpy(pc1->cle, "Remsaalps!123456");
+	memcpy(pc1->cle, "Remsaalps!123456", CLE_SIZE_MAX);
 }
 
 static void pc1_decrypt_buf(struct pc1_ctx *pc1, unsigned char *buf,
@@ -215,7 +217,6 @@ static int decrypt;
 void usage(int status)
 {
 	FILE *stream = (status != EXIT_SUCCESS) ? stderr : stdout;
-	struct board_info *board;
 
 	fprintf(stream, "Usage: %s [OPTIONS...]\n", progname);
 	fprintf(stream,
@@ -238,7 +239,7 @@ int main(int argc, char *argv[])
 	int res = EXIT_FAILURE;
 	int err;
 	struct stat st;
-	char *buf;
+	uint8_t *buf;
 	unsigned total;
 
 	FILE *outfile, *infile;
@@ -316,8 +317,8 @@ int main(int argc, char *argv[])
 			datalen = total;
 
 		errno = 0;
-		fread(buf, datalen, 1, infile);
-		if (errno != 0) {
+		size_t r = fread(buf, datalen, 1, infile);
+		if (r != 1 && errno != 0) {
 			ERRS("unable to read from file %s", ifname);
 			goto err_close_out;
 		}
@@ -340,7 +341,6 @@ int main(int argc, char *argv[])
 
 	res = EXIT_SUCCESS;
 
- out_flush:
 	fflush(outfile);
 
  err_close_out:
