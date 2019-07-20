@@ -65,9 +65,9 @@ static char *	o_dump = NULL;		/* Seama file to dump. */
 static char *	o_seal = NULL;		/* Seal the input images when file name exist. */
 static char *	o_extract = NULL;	/* Extract the seama file. */
 static char *	o_images[MAX_IMAGE];/* The image files to pack or seal */
-static int		o_isize = 0;		/* number of images */
+static size_t	o_isize = 0;		/* number of images */
 static char *	o_meta[MAX_META];	/* meta data array */
-static int		o_msize = 0;		/* size of meta array */
+static size_t	o_msize = 0;		/* size of meta array */
 
 static void verbose(const char * format, ...)
 {
@@ -450,7 +450,11 @@ static void extract_file(const char * output)
 		while (!feof(ifh) && !ferror(ifh))
 		{
 			/* read header */
-			fread(&shdr, sizeof(shdr), 1, ifh);
+			if (fread(&shdr, sizeof(shdr), 1, ifh) != 1) {
+				printf("SEAMA: error reading header\n");
+				break;
+			}
+
 			if (shdr.magic != htonl(SEAMA_MAGIC)) break;
 			/* Get the size */
 			isize = ntohl(shdr.size);
@@ -466,11 +470,19 @@ static void extract_file(const char * output)
 				continue;
 			}
 			/* read checksum */
-			fread(buf, sizeof(char), 16, ifh);
+			if (fread(buf, sizeof(char), 16, ifh) != 16) {
+				printf("SEAMA: error reading checksum\n");
+				break;
+			}
+
 			if (msize > 0)
 			{
 				/* read META */
-				fread(buf, sizeof(char), msize, ifh);
+				if (fread(buf, sizeof(char), msize, ifh) != msize) {
+					printf("SEAMA: error reading meta\n");
+					break;
+				}
+
 				if (match_meta((const char *)buf, msize))
 				{
 					printf("SEAMA: found image @ '%s', image size: %zu\n", o_images[i], isize);
