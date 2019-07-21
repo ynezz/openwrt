@@ -102,7 +102,6 @@ static void
 usage(const char *progname, int status)
 {
 	FILE *stream = (status != EXIT_SUCCESS) ? stderr : stdout;
-	int i;
 
 	fprintf(stream, "Usage: %s [OPTIONS...]\n", progname);
 	fprintf(stream, "\n"
@@ -116,11 +115,11 @@ usage(const char *progname, int status)
 int
 process_image(char *progname, char *filename, op_mode_t opmode)
 {
-	int 		fd, len;
-	void 		*data, *ptr;
+	int 		fd, r;
+	void 		*ptr;
 	char		namebuf[IH_NMLEN];
 	struct 		stat sbuf;
-	uint32_t	checksum, offset_kernel, offset_sqfs, offset_end,
+	uint32_t	offset_kernel, offset_sqfs, offset_end,
 				offset_sec_header, offset_eb, offset_image_end;
 	squashfs_sb_t *sqs;
 	image_header_t *hdr;
@@ -165,12 +164,14 @@ process_image(char *progname, char *filename, op_mode_t opmode)
 	}
 
 	if (opmode == FACTORY) {
-		strncpy(namebuf, hdr->tail.ih_name, IH_NMLEN);
+		memcpy(namebuf, hdr->tail.ih_name, IH_NMLEN);
 		hdr->tail.asus.kernel.major = 0;
 		hdr->tail.asus.kernel.minor = 0;
 		hdr->tail.asus.fs.major = 0;
 		hdr->tail.asus.fs.minor = 0;
-		strncpy((char *)&hdr->tail.asus.productid, "RT-N56U", IH_PRODLEN);
+
+		const char p[] = "RT-N56U";
+		memcpy(&hdr->tail.asus.productid, p, sizeof(p));
 	}
 
 	if (hdr->tail.asus.ih_ksz == 0)
@@ -208,7 +209,11 @@ process_image(char *progname, char *filename, op_mode_t opmode)
 	 */
 	if (offset_image_end > sbuf.st_size) {
 		(void) munmap((void *)ptr, sbuf.st_size);
-		ftruncate(fd, offset_image_end);
+
+		r = ftruncate(fd, offset_image_end);
+		if (r < 0)
+			goto err_ftruncate;
+
 		ptr = (void *)mmap(0, offset_image_end,
 						PROT_READ | PROT_WRITE,
 						MAP_SHARED,
@@ -230,7 +235,7 @@ process_image(char *progname, char *filename, op_mode_t opmode)
 	if (opmode == FACTORY) {
 		hdr = ptr+offset_sec_header;
 		memcpy(hdr, ptr, sizeof(image_header_t));
-		strncpy(hdr->tail.ih_name, namebuf, IH_NMLEN);
+		memcpy(hdr->tail.ih_name, namebuf, IH_NMLEN);
 		calc_crc(hdr, ptr+offset_kernel, offset_sqfs - offset_kernel);
 		calc_crc((image_header_t *)ptr, ptr+offset_kernel, offset_image_end - offset_kernel);
 	} else {
@@ -242,17 +247,26 @@ process_image(char *progname, char *filename, op_mode_t opmode)
 	else
 		(void) munmap((void *)ptr, offset_image_end);
 
-	ftruncate(fd, offset_image_end);
-	(void) close (fd);
+	r = ftruncate(fd, offset_image_end);
+	if (r < 0)
+		goto err_ftruncate;
 
+	(void) close (fd);
 	return EXIT_SUCCESS;
+
+err_ftruncate:
+	close(fd);
+	fprintf(stderr, "%s: Can't ftruncate %s: %s\n",
+		progname, filename, strerror(errno));
+	return (EXIT_FAILURE);
 }
 
 int
 main(int argc, char **argv)
 {
 	int 		opt;
-	char 		*filename, *progname;
+	char		*progname;
+	char 		*filename = NULL;
 	op_mode_t	opmode = NONE;
 
 	progname = argv[0];
@@ -269,6 +283,7 @@ main(int argc, char **argv)
 			break;
 		case 'h':
 			opmode = NONE;
+			/* fall through */
 		default:
 			usage(progname, EXIT_FAILURE);
 			opmode = NONE;
