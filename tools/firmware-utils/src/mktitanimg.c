@@ -40,9 +40,8 @@ void print_help(void)
 void mknspimg_print_hdr(struct nsp_img_hdr *hdr)
 {
 	struct nsp_img_hdr_chksum	*chksum;
-	struct nsp_img_hdr_section_info	*sect_info;
 	struct nsp_img_hdr_sections	*section;
-	int i;
+	unsigned int i;
 
 	printf("****************** NSP Image Summary ******************\n");
 	printf("Magic:             0x%x\n",		hdr->head.magic);
@@ -118,14 +117,11 @@ int main(int argc, char* argv[], char* env[])
 	int	cmdline_err;
 	char*	cmdline_error_msg;
 
-	char*	filen_kernel;
-	char*	filen_files;
 	char*	filen_out;
 
 	int	i,count;			/* loop variables */
 	int	num_sects = 2;			/* We require exactly two image with -i option
 							   (see CMDLINE_CFG structure above) */
-	int	desc_count=0;
 	int	total = 0;
 
 	int	header_size=0;
@@ -158,8 +154,6 @@ int main(int argc, char* argv[], char* env[])
 		header_version=atoi(argv[cmdline_getarg(cmdline_getarg_list('h'),0)]);
 	}
 	/* Set up arguments */
-	filen_kernel	= argv[cmdline_getarg(cmdline_getarg_list('i'),0)];
-	filen_files	= argv[cmdline_getarg(cmdline_getarg_list('i'),1)];
 	filen_out	= argv[cmdline_getarg(cmdline_getarg_list('o'),0)];
 	/* Command line arguments have been parsed. Start doing our work. */
 
@@ -205,7 +199,7 @@ int main(int argc, char* argv[], char* env[])
 	printf("total=%x\n",total);
 	{
 		int align;
-		int	padding;
+		unsigned int	padding;
 		char * buf;
 		align = (header_version==1?0x10000:0x4000);
 		if(align==0) {
@@ -284,12 +278,13 @@ int main(int argc, char* argv[], char* env[])
 		/* Account for the total */
 		align	=  strtoul(argv[cmdline_getarg(cmdline_getarg_list('a'),i)],NULL,0);
 		if(i==0){
-			if(align==0 || (((section->raw_size+ section->offset)%align)==0))
+			if (align==0 || (((section->raw_size+ section->offset)%align)==0)) {
 				padding=0;
-			else
+			} else {
 				padding = align - ((section->raw_size+ section->offset) % align);
+			}
 
-				section->total_size=section->raw_size + padding;
+			section->total_size=section->raw_size + padding;
 		}
 		else{
 			#define EXTRA_BLOCK 0x10000
@@ -405,15 +400,23 @@ int main(int argc, char* argv[], char* env[])
 		fseek(nsp_image,0,SEEK_SET);
 
 		/* Read header from the file */
-		fread((void*)&head, sizeof(struct nsp_img_hdr_head),
+		ssize_t r = fread((void*)&head, sizeof(struct nsp_img_hdr_head),
 				1, nsp_image);
+		if (r != 1) {
+			printf("ERROR: can't read nsp_img_hdr_head\n");
+			return -1;
+		}
 
 		/* Get memory to store the complete header */
 		hdr = (struct nsp_img_hdr *)malloc(head.hdr_size);
 
 		/* Read header from the file */
 		fseek(nsp_image,0,SEEK_SET);
-		fread((void*)hdr, head.hdr_size, 1, nsp_image);
+		r = fread((void*)hdr, head.hdr_size, 1, nsp_image);
+		if (r != 1) {
+			printf("ERROR: can't read header\n");
+			return -1;
+		}
 
 		/* Print it out */
 		mknspimg_print_hdr(hdr);
@@ -442,7 +445,13 @@ int main(int argc, char* argv[], char* env[])
 		len = ftell(nsp_image);
 		img_buf=malloc(len);
 		fseek(nsp_image, 0, SEEK_SET);
-		fread(img_buf, 1, len, nsp_image);
+
+		ssize_t r = fread(img_buf, 1, len, nsp_image);
+		if (r != len) {
+			printf("ERROR: can't read header\n");
+			return -1;
+		}
+
 		img_buf[0xb] = 0x17;
 		fwrite(img_buf, 1, len-sizeof(struct checksumrecord), non_web);
 		fclose(non_web);
@@ -516,26 +525,6 @@ static unsigned long crctab[256] =
 	0x933EB0BB, 0x97FFAD0C, 0xAFB010B1, 0xAB710D06, 0xA6322BDF,
 	0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4
 };
-
-int cs_is_tagged(FILE *fp)
-{
-	char buf[8];
-
-	fseek(fp, -8, SEEK_END);
-	fread(buf, 8, 1, fp);
-	if(*(unsigned long*)buf == CKSUM_MAGIC_NUMBER)
-		return 1;
-	return 0;
-}
-
-unsigned long cs_read_sum(FILE *fp)
-{
-	char buf[8];
-
-	fseek(fp, -8, SEEK_END);
-	fread(buf, 8, 1, fp);
-	return *((unsigned long*)&buf[4]);
-}
 
 int cs_calc_sum(FILE *fp, unsigned long *res, int tagged)
 {
@@ -627,42 +616,6 @@ int cs_set_sum(FILE *fp, unsigned long sum, int tagged)
 	if(fwrite(&sum, 1, 4, fp) < 4)
 		return 0;
 
-	return 1;
-}
-
-void cs_get_sum(FILE *fp, unsigned long *sum)
-{
-	unsigned long magic = 0;
-
-	fseek(fp, -8, SEEK_END);
-
-	fread(&magic, 4, 1, fp);
-	fread(sum, 4, 1, fp);
-}
-
-int cs_validate_file(char *filename)
-{
-	FILE *pFile = NULL;
-	unsigned long sum = 0, res = 0;
-
-	if((pFile = fopen(filename, "r")) == NULL)
-		return 0;
-
-	if(!cs_is_tagged(pFile))
-	{
-		fclose(pFile);
-		return 0;
-	}
-	if(!cs_calc_sum(pFile, &sum, 1))
-	{
-		fclose(pFile);
-		return 0;
-	}
-	cs_get_sum(pFile, &res);
-	fclose(pFile);
-
-	if(sum != res)
-		return 0;
 	return 1;
 }
 
