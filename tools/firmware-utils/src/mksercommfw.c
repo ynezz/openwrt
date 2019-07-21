@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -52,11 +53,11 @@ static int is_header = 1;
 
 struct file_info {
 	char* file_name; /* name of the file */
-	char* file_data; /* data of the file in memory */
+	uint8_t* file_data; /* data of the file in memory */
 	u_int32_t file_size; /* length of the file */
 };
 
-static u_int8_t getCheckSum(char* data, int len) {
+static u_int8_t getCheckSum(uint8_t* data, int len) {
 	u_int8_t new = 0;
 	int i;
 
@@ -79,7 +80,7 @@ static u_int8_t getCheckSum(char* data, int len) {
 static int copyToOutputBuf(struct file_info* finfo) {
 	FILE* fp = NULL;
 
-	int file_sz = 0;
+	size_t file_sz = 0;
 	int extra_sz;
 	int hdr_pos;
 	int img_pos;
@@ -236,12 +237,12 @@ int main(int argc, char* argv[]) {
 
 	DBG("Filling header: %s %s %2X %s\n", hwID, hwVer, swVer, magic);
 
-	strncpy(image.file_data + hdr_offset + 0, magic, 7);
+	memcpy(image.file_data + hdr_offset, magic, 7);
 	memcpy(image.file_data + hdr_offset + 7, version, sizeof(version));
-	strncpy(image.file_data + hdr_offset + 11, hwID, 34);
-	strncpy(image.file_data + hdr_offset + 45, hwVer, 10);
+	memcpy(image.file_data + hdr_offset + 11, hwID, 34);
+	memcpy(image.file_data + hdr_offset + 45, hwVer, 10);
 	memcpy(image.file_data + hdr_offset + 55, &swVer, sizeof(swVer));
-	strncpy(image.file_data + hdr_offset + 63, magic, 7);
+	memcpy(image.file_data + hdr_offset + 63, magic, 7);
 
 	/* calculate checksum and invert checksum */
 	if (is_header) {
