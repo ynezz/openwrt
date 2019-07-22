@@ -254,7 +254,11 @@ static int meraki_build_hdr(const struct board_info *board, const size_t klen,
 
 	/* Load kernel */
 	kernel = buf + HDR_LENGTH;
-	fread(kernel, klen, 1, in);
+	size_t r = fread(kernel, klen, 1, in);
+	if (r != 1) {
+		ERRS("unable to load kernel: %s\n");
+		return EXIT_FAILURE;
+	}
 
 	/* Write magic values and filler */
 	writel(buf, HDR_OFF_MAGIC1, board->magic);
