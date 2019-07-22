@@ -105,7 +105,6 @@ static struct board_info *find_board(char *id)
 void usage(int status)
 {
 	FILE *stream = (status != EXIT_SUCCESS) ? stderr : stdout;
-	struct board_info *board;
 
 	fprintf(stream, "Usage: %s [OPTIONS...]\n", progname);
 	fprintf(stream,
@@ -127,7 +126,7 @@ int main(int argc, char *argv[])
 	int buflen;
 	int err;
 	struct stat st;
-	char *buf;
+	uint8_t *buf;
 	struct planex_hdr *hdr;
 	sha1_context ctx;
 	uint32_t seed;
@@ -221,8 +220,8 @@ int main(int argc, char *argv[])
 	}
 
 	errno = 0;
-	fread(buf +  sizeof(*hdr), st.st_size, 1, infile);
-	if (errno != 0) {
+	size_t r = fread(buf +  sizeof(*hdr), st.st_size, 1, infile);
+	if (r != 1 || errno != 0) {
 		ERRS("unable to read from file %s", ifname);
 		goto err_close_in;
 	}
@@ -248,7 +247,6 @@ int main(int argc, char *argv[])
 
 	res = EXIT_SUCCESS;
 
- out_flush:
 	fflush(outfile);
 
  err_close_out:
