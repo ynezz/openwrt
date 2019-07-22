@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
 {
 	int ret = EXIT_FAILURE;
 	long klen;
-	size_t kspace;
+	long kspace;
 	unsigned char *kernel;
 	size_t buflen;
 	unsigned char *buf;
@@ -270,7 +270,11 @@ int main(int argc, char *argv[])
 
 	/* Load kernel */
 	kernel = buf + HDR_LENGTH;
-	fread(kernel, klen, 1, in);
+	size_t r = fread(kernel, klen, 1, in);
+	if (r != 1) {
+		ERRS("unable to load kernel: %s\n");
+		goto err_close_in;
+	}
 
 	/* Write magic values */
 	writel(buf, HDR_OFF_MAGIC1, board->magic1);
