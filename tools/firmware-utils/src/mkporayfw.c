@@ -373,8 +373,8 @@ static int read_to_buf(struct file_info *fdata, uint8_t *buf)
 	}
 
 	errno = 0;
-	fread(buf, fdata->file_size, 1, f);
-	if (errno != 0) {
+	size_t r = fread(buf, fdata->file_size, 1, f);
+	if (r != 1 || errno != 0) {
 		ERRS("unable to read from file \"%s\"", fdata->file_name);
 		goto out_close;
 	}
