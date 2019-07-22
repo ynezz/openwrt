@@ -30,6 +30,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/types.h>
@@ -67,7 +68,7 @@ static DES_key_schedule schedule;
  
 static void show_usage(const char *arg0);
 static void exit_cleanup(void);
-static void copy_file(int src, int dst);
+static bool copy_file(const char *filename, int src, int dst);
 static void do_encrypt(void *p, off_t len);
 static void do_decrypt(void *p, off_t len);
  
@@ -181,11 +182,15 @@ int main(int argc, char **argv)
 			        strerror(errno));
 			exit(EXIT_FAILURE);
 		}
-		copy_file(input_fd, temp_fd);
+
+		if (!copy_file(input_filename, input_fd, temp_fd))
+			exit(EXIT_FAILURE);
+
 		close(input_fd);
 	}
 	else {
-		copy_file(STDIN_FILENO, temp_fd);
+		if (!copy_file("stdin", STDIN_FILENO, temp_fd))
+			exit(EXIT_FAILURE);
 	}
  
 	file_len = lseek(temp_fd, 0, SEEK_CUR);
@@ -203,7 +208,7 @@ int main(int argc, char **argv)
 	if (encrypt_opt) {
 		header = (image_header_t *)p;
 		off_t len = min(file_len,
-		                ntohl(header->ih_size) + sizeof(image_header_t));
+		                (off_t) (ntohl(header->ih_size) + sizeof(image_header_t)));
 		if (ntohl(header->ih_magic) != IH_MAGIC) {
 			fprintf(stderr, "Header magic incorrect: "
 			        "expected 0x%08X, got 0x%08X\n",
@@ -222,7 +227,7 @@ int main(int argc, char **argv)
 	}
  
 	if (decrypt_opt) {
-		off_t header_len = min(file_len, sizeof(image_header_t) + 3);
+		off_t header_len = min(file_len, (off_t) (sizeof(image_header_t) + 3));
 		memcpy(buf, p, header_len);
 		do_decrypt(buf, header_len);
 		header = (image_header_t *)buf;
@@ -244,11 +249,15 @@ int main(int argc, char **argv)
 			        output_filename, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
-		copy_file(temp_fd, output_fd);
+
+		if (!copy_file(output_filename, temp_fd, output_fd))
+			exit(EXIT_FAILURE);
+
 		close(output_fd);
 	}
 	else {
-		copy_file(temp_fd, STDOUT_FILENO);
+		if (!copy_file(output_filename, temp_fd, STDOUT_FILENO))
+			exit(EXIT_FAILURE);
 	}
  
 	exit(EXIT_SUCCESS);
@@ -272,14 +281,20 @@ static void exit_cleanup(void)
 	}
 }
  
-static void copy_file(int src, int dst)
+static bool copy_file(const char *filename, int src, int dst)
 {
 	char buf[4096];
 	ssize_t size;
- 
+
 	while ((size = read(src, buf, 4096)) > 0) {
-        write(dst, buf, size);
-    }
+		ssize_t r = write(dst, buf, size);
+		if (r < 0) {
+			fprintf(stderr, "Can't write to %s: %s\n", filename, strerror(errno));
+			return false;
+		}
+	}
+
+	return true;
 }
  
 static void do_encrypt(void *p, off_t len)
