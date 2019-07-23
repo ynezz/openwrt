@@ -65,7 +65,9 @@ main(int argc, char *argv[])
 	buf[0xe] = (size >> 8) & 0xff;
 	buf[0xf] = size & 0xff;
 
-	read(in, &buf[DHP_HEADER_SIZE], in_st.st_size);
+	ssize_t r = read(in, &buf[DHP_HEADER_SIZE], in_st.st_size);
+	if (r < 0)
+		err(EXIT_FAILURE, "read header");
 	close(in);
 
 	crc = buffalo_crc(buf, size);
@@ -76,7 +78,9 @@ main(int argc, char *argv[])
 
 	if ((out = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
 		err(EXIT_FAILURE, "%s", argv[2]);
-	write(out, buf, size);
+	r = write(out, buf, size);
+	if (r < 0)
+		err(EXIT_FAILURE, "write output");
 	close(out);
 
 	free(buf);
