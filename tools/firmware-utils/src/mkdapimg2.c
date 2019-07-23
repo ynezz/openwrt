@@ -92,7 +92,7 @@ main(int ac, char *av[])
 	char region[MAX_REG_LEN];
 	int kernel = 0;
 
-	FILE *ifile, *ofile;
+	FILE *ifile = NULL, *ofile = NULL;
 	int c;
 
 	uint32_t cksum;
@@ -178,7 +178,7 @@ main(int ac, char *av[])
 	strncpy(imghdr.fw_ver, version, MAX_FW_VER_LEN);
 	strncpy(imghdr.fw_reg, region, MAX_REG_LEN);
 
-	if (fwrite(&imghdr, sizeof(imghdr), 1, ofile) < 0)
+	if (fwrite(&imghdr, sizeof(imghdr), 1, ofile) != 1)
 		perrexit(2, "fwrite header on output");
 
 	while ((c = fgetc(ifile)) != EOF) {
