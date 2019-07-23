@@ -68,7 +68,7 @@ main(int ac, char *av[])
 	int fixmode = 0;
 	int have_regionversion = 0;
 
-	FILE *ifile, *ofile;
+	FILE *ifile = NULL, *ofile = NULL;
 	int c;
 	uint32_t cksum;
 	uint32_t bcnt;
@@ -155,11 +155,11 @@ main(int ac, char *av[])
 			fprintf(stderr, "%s: auto model name failed, string %s too long\n", progname, signature);
 			exit(1);
 		}
-		strncpy(model, signature, p - signature);
+		memcpy(model, signature, p - signature);
 	}
 
 	if (patchmode) {
-		if (fread(&imghdr, sizeof(imghdr), 1, ifile) < 0)
+		if (fread(&imghdr, sizeof(imghdr), 1, ifile) != 1)
 			perrexit(2, "fread on input");
 	}
 
@@ -200,15 +200,15 @@ main(int ac, char *av[])
 		}
 	}
 
-	strncpy(imghdr.model, model, MAX_MODEL_NAME_LEN);
-	strncpy(imghdr.sig, signature, MAX_SIG_LEN);
+	memcpy(imghdr.model, model, MAX_MODEL_NAME_LEN);
+	memcpy(imghdr.sig, signature, MAX_SIG_LEN);
 
-	if (fwrite(&imghdr, sizeof(imghdr), 1, ofile) < 0)
+	if (fwrite(&imghdr, sizeof(imghdr), 1, ofile) != 1)
 		perrexit(2, "fwrite header on output");
 	if (have_regionversion) {
-		if (fwrite(&region, MAX_REGION_LEN, 1, ofile) < 0)
+		if (fwrite(&region, MAX_REGION_LEN, 1, ofile) != 1)
 			perrexit(2, "fwrite header on output");
-		if (fwrite(&version, MAX_VERSION_LEN, 1, ofile) < 0)
+		if (fwrite(&version, MAX_VERSION_LEN, 1, ofile) != 1)
 			perrexit(2, "fwrite header on output");
 	}
 
