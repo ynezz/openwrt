@@ -38,10 +38,10 @@ struct img_header {
 	uint32_t	checksum;
 	uint32_t	image_size;
 	uint32_t	kernel_size;
-	char		model[MAX_MODEL_LEN];
-	char		signature[MAX_SIGNATURE_LEN];
-	char		region[MAX_REGION_LEN];
-	char		version[MAX_VERSION_LEN];
+	uint8_t		model[MAX_MODEL_LEN];
+	uint8_t		signature[MAX_SIGNATURE_LEN];
+	uint8_t		region[MAX_REGION_LEN];
+	uint8_t		version[MAX_VERSION_LEN];
 	unsigned char	header_len;
 	unsigned char	is_tgz;
 	unsigned char	pad[4];
@@ -154,8 +154,8 @@ static int read_to_buf(struct file_info *fdata, char *buf)
 	}
 
 	errno = 0;
-	fread(buf, fdata->file_size, 1, f);
-	if (errno != 0) {
+	size_t r = fread(buf, fdata->file_size, 1, f);
+	if (r != 1 || errno != 0) {
 		ERRS("unable to read from file \"%s\"", fdata->file_name);
 		goto out_close;
 	}
@@ -182,7 +182,7 @@ static int check_options(void)
 
 #define CHKSTRLEN(_name, _msg)					\
 	do {							\
-		int field_len;					\
+		unsigned int field_len;				\
 		CHKSTR(_name, _msg);				\
 		field_len = FIELD_SIZEOF(struct img_header, _name) - 1; \
 		if (strlen(_name) > field_len) { 		\
@@ -343,10 +343,18 @@ static int build_fw(void)
 	else
 		hdr->kernel_size = htonl(kernel_size);
 	hdr->header_len = sizeof(struct img_header);
-	strncpy(hdr->model, model, sizeof(hdr->model));
-	strncpy(hdr->signature, signature, sizeof(hdr->signature));
-	strncpy(hdr->version, version, sizeof(hdr->version));
-	strncpy(hdr->region, region, sizeof(hdr->region));
+
+#define CPYSMEMB(dst, src)					\
+	do {							\
+		size_t slen = strlen(src);			\
+		size_t dlen = sizeof(dst);			\
+		memcpy(dst, src, slen > dlen ? dlen : slen);	\
+	} while (0);
+
+	CPYSMEMB(hdr->model, model);
+	CPYSMEMB(hdr->signature, signature);
+	CPYSMEMB(hdr->version, version);
+	CPYSMEMB(hdr->region, region);
 
 	ret = write_fw(buf, buflen);
 	if (ret)
