@@ -176,8 +176,8 @@ int main(int argc, char *argv[])
 	}
 
 	errno = 0;
-	fread(buf +  DNI_HDR_LEN, st.st_size, 1, infile);
-	if (errno != 0) {
+	size_t r = fread(buf +  DNI_HDR_LEN, st.st_size, 1, infile);
+	if (r != 1 || errno != 0) {
 		ERRS("unable to read from file %s", ifname);
 		goto err_close_in;
 	}
