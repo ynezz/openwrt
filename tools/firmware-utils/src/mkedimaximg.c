@@ -89,7 +89,7 @@ static int strtou32(char *arg, unsigned int *val)
 }
 
 static unsigned short fwcsum (struct buf *buf) {
-    int i;
+    unsigned int i;
     unsigned short ret = 0;
 
     for (i = 0; i < buf->size / 2; i++) {
@@ -113,7 +113,7 @@ static int fwread(struct finfo *finfo, struct buf *buf)
     }
 
     buf->size = fread(buf->start, 1, finfo->size, f);
-    if (buf->size != finfo->size) {
+    if (buf->size != (size_t) finfo->size) {
 	fprintf(stderr, "unable to read from file \"%s\"\n", finfo->name);
 	usage(EXIT_FAILURE);
     }
@@ -134,7 +134,7 @@ static int fwwrite(struct finfo *finfo, struct buf *buf)
     }
 
     buf->size = fwrite(buf->start, 1, finfo->size, f);
-    if (buf->size != finfo->size) {
+    if (buf->size != (size_t) finfo->size) {
 	fprintf(stderr, "unable to write to file \"%s\"\n", finfo->name);
 	usage(EXIT_FAILURE);
     }
@@ -151,6 +151,7 @@ int main(int argc, char **argv)
     struct buf ibuf, obuf;
     struct finfo ifinfo, ofinfo;
     unsigned short csum;
+    unsigned int p;
     int c;
 
     ifinfo.name = ofinfo.name = NULL;
@@ -183,16 +184,18 @@ int main(int argc, char **argv)
 	    usage(EXIT_SUCCESS);
 	    break;
 	case 'f':
-	    if (!strtou32(optarg, &header.flash)) {
+	    if (!strtou32(optarg, &p)) {
 		fprintf(stderr, "invalid flash address specified\n");
 		usage(EXIT_FAILURE);
 	    }
+	    header.flash = p;
 	    break;
 	case 'S':
-	    if (!strtou32(optarg, &header.start)) {
+	    if (!strtou32(optarg, &p)) {
 		fprintf(stderr, "invalid start address specified\n");
 		usage(EXIT_FAILURE);
 	    }
+	    header.start = p;
 	    break;
 	case 'b':
 	    force_be = TRUE;
