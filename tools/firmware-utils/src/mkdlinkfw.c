@@ -232,9 +232,9 @@ static int find_auh_headers(char *buf)
 
 	while (tmp_buf - buf <= inspect_info.file_size - AUH_SIZE) {
 		if (!memcmp(tmp_buf, AUH_MAGIC, 3)) {
-			if (((struct auh_header *)tmp_buf)->header_checksum ==
-			    (uint16_t) ~jboot_checksum(0, (uint16_t *) tmp_buf,
-							AUH_SIZE - 2)) {
+			uint16_t cksum = ~jboot_checksum(0, (uint16_t *) tmp_buf, AUH_SIZE - 2);
+			uint16_t hcksum = ((struct auh_header *)tmp_buf)->header_checksum;
+			if (hcksum == cksum) {
 				uint16_t checksum = 0;
 				printf("Find proper AUH header at: 0x%lX!\n",
 				       tmp_buf - buf);
@@ -281,12 +281,11 @@ static int check_stag_header(char *buf, struct stag_header *header)
 
 	int ret = EXIT_FAILURE;
 
+	uint16_t cksum = ~jboot_checksum(0, (uint16_t *) header, STAG_SIZE - 2);
 	uint8_t cmark_tmp = header->cmark;
 	header->cmark = header->id;
 
-	if (header->tag_checksum ==
-	    (uint16_t) ~jboot_checksum(0, (uint16_t *) header,
-					STAG_SIZE - 2)) {
+	if (header->tag_checksum == cksum) {
 		uint16_t checksum = 0;
 		printf("Find proper STAG header at: 0x%lX!\n",
 		       (char *)header - buf);
