@@ -50,7 +50,6 @@ static char *board_id;
 void usage(int status)
 {
 	FILE *stream = (status != EXIT_SUCCESS) ? stderr : stdout;
-	struct board_info *board;
 
 	fprintf(stream, "Usage: %s [OPTIONS...]\n", progname);
 	fprintf(stream,
@@ -160,8 +159,8 @@ int main(int argc, char *argv[])
 	}
 
 	errno = 0;
-	fread(buf +  DNI_HDR_LEN, st.st_size, 1, infile);
-	if (errno != 0) {
+	size_t r = fread(buf +  DNI_HDR_LEN, st.st_size, 1, infile);
+	if (r != 1 || errno != 0) {
 		ERRS("unable to read from file %s", ifname);
 		goto err_close_in;
 	}
@@ -188,7 +187,6 @@ int main(int argc, char *argv[])
 
 	res = EXIT_SUCCESS;
 
- out_flush:
 	fflush(outfile);
 
  err_close_out:
