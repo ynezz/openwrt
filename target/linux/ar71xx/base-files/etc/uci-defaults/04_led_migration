@@ -60,6 +60,8 @@ oolite-v1)
 	;;
 wndap360|\
 wndr3700|\
+wndr3700v2|\
+wndr3800|\
 wnr2000|\
 wnr2200)
 	migrate_leds "${board}:=netgear:"

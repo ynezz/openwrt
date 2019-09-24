@@ -46,13 +46,16 @@ wndr3700_board_detect() {
 				machine="NETGEAR WNDRMAC"
 			else
 				machine="NETGEAR WNDR3700v2"
+				name="wndr3700v2"
 			fi
 			;;
 		'29763654+16+64'*)
 			machine="NETGEAR ${model_stripped:14}"
+			name="wndr3700v2"
 			;;
 		'29763654+16+128'*)
 			machine="NETGEAR ${model_stripped:15}"
+			name="wndr3800"
 			;;
 		*)
 			# Unknown ID

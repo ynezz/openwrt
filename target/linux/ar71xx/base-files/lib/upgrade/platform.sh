@@ -677,6 +677,8 @@ platform_check_image() {
 		return 1
 		;;
 	wndr3700|\
+	wndr3700v2|\
+	wndr3800|\
 	wnr1000-v2|\
 	wnr2000-v3|\
 	wnr612-v2|\

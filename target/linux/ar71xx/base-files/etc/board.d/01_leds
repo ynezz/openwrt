@@ -999,7 +999,9 @@ wam250)
 wndap360)
 	ucidef_set_led_power "power" "POWER GREEN" "netgear:green:power" "1"
 	;;
-wndr3700)
+wndr3700|\
+wndr3700v2|\
+wndr3800)
 	ucidef_set_led_default "wan" "WAN LED (green)" "netgear:green:wan" "0"
 	ucidef_set_led_usbport "usb" "USB" "netgear:green:usb" "usb1-port1"
 	;;

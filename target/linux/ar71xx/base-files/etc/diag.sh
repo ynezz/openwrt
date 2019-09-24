@@ -527,7 +527,9 @@ get_status_led() {
 	r6100|\
 	wndap360|\
 	wndr3700|\
+	wndr3700v2|\
 	wndr3700v4|\
+	wndr3800|\
 	wndr4300|\
 	wnr2000|\
 	wnr2000-v3|\
