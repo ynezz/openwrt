@@ -5,7 +5,7 @@
 
 / {
 	model = "Buffalo WXR-2533DHP";
-	compatible = "buffalo,wxr-2533dhp", "qcom,ipq8064";
+	compatible = "buffalo,wxr-2533dhp";
 
 	memory@42000000 {
 		reg = <0x42000000 0x1e000000>;
@@ -240,7 +240,7 @@
 };
 
 &gmac2 {
-	status = "ok";
+	status = "okay";
 
 	phy-mode = "sgmii";
 	qcom,id = <2>;
@@ -367,22 +367,6 @@
 			};
 		};
 	};
-};
-
-&hs_phy_0 {		/* USB3 port 0 HS phy */
-	status = "okay";
-};
-
-&ss_phy_0 {		/* USB3 port 0 SS phy */
-	status = "okay";
-};
-
-&hs_phy_1 {		/* USB3 port 1 HS phy */
-	status = "okay";
-};
-
-&ss_phy_1 {		/* USB3 port 1 SS phy */
-	status = "okay";
 };
 
 &usb3_0 {

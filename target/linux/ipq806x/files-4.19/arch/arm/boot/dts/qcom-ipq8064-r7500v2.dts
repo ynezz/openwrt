@@ -4,7 +4,7 @@
 
 / {
 	model = "Netgear Nighthawk X4 R7500v2";
-	compatible = "netgear,r7500v2", "qcom,ipq8064";
+	compatible = "netgear,r7500v2";
 
 	memory@0 {
 		reg = <0x42000000 0x1e000000>;
@@ -136,9 +136,9 @@
 
 		gsbi@16300000 {
 			qcom,mode = <GSBI_PROT_I2C_UART>;
-			status = "ok";
+			status = "okay";
 			serial@16340000 {
-				status = "ok";
+				status = "okay";
 			};
 			/*
 			 * The i2c device on gsbi4 should not be enabled.
@@ -149,52 +149,36 @@
 		};
 
 		sata-phy@1b400000 {
-			status = "ok";
+			status = "okay";
 		};
 
 		sata@29000000 {
-			status = "ok";
+			status = "okay";
 		};
 
-		phy@100f8800 {		/* USB3 port 1 HS phy */
-			status = "ok";
-		};
-
-		phy@100f8830 {		/* USB3 port 1 SS phy */
-			status = "ok";
-		};
-
-		phy@110f8800 {		/* USB3 port 0 HS phy */
-			status = "ok";
-		};
-
-		phy@110f8830 {		/* USB3 port 0 SS phy */
-			status = "ok";
-		};
-
-		usb30@0 {
-			status = "ok";
+		usb3_0: usb3@110f8800 {
+			status = "okay";
 
 			pinctrl-0 = <&usb0_pwr_en_pins>;
 			pinctrl-names = "default";
 		};
 
-		usb30@1 {
-			status = "ok";
+		usb3_1: usb3@100f8800 {
+			status = "okay";
 
 			pinctrl-0 = <&usb1_pwr_en_pins>;
 			pinctrl-names = "default";
 		};
 
 		pcie0: pci@1b500000 {
-			status = "ok";
+			status = "okay";
 			reset-gpio = <&qcom_pinmux 3 GPIO_ACTIVE_LOW>;
 			pinctrl-0 = <&pcie0_pins>;
 			pinctrl-names = "default";
 		};
 
 		pcie1: pci@1b700000 {
-			status = "ok";
+			status = "okay";
 			reset-gpio = <&qcom_pinmux 48 GPIO_ACTIVE_LOW>;
 			pinctrl-0 = <&pcie1_pins>;
 			pinctrl-names = "default";
@@ -202,7 +186,7 @@
 		};
 
 		nand@1ac00000 {
-			status = "ok";
+			status = "okay";
 
 			pinctrl-0 = <&nand_pins>;
 			pinctrl-names = "default";
@@ -257,7 +241,13 @@
 
 					ubi@1880000 {
 						label = "ubi";
-						reg = <0x1880000 0x6080000>;
+						reg = <0x1880000 0x1C00000>;
+					};
+
+					netgear@3480000 {
+						label = "netgear";
+						reg = <0x3480000 0x4480000>;
+						read-only;
 					};
 
 					reserve@7900000 {
@@ -296,7 +286,7 @@
 		};
 
 		gmac1: ethernet@37200000 {
-			status = "ok";
+			status = "okay";
 			phy-mode = "rgmii";
 			qcom,id = <1>;
 
@@ -312,7 +302,7 @@
 		};
 
 		gmac2: ethernet@37400000 {
-			status = "ok";
+			status = "okay";
 			phy-mode = "sgmii";
 			qcom,id = <2>;
 
@@ -403,5 +393,5 @@
 };
 
 &adm_dma {
-	status = "ok";
+	status = "okay";
 };

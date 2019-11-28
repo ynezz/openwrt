@@ -4,7 +4,7 @@
 
 / {
 	model = "NEC Aterm WG2600HP";
-	compatible = "nec,wg2600hp", "qcom,ipq8064";
+	compatible = "nec,wg2600hp";
 
 	memory@0 {
 		reg = <0x42000000 0x1e000000>;
@@ -319,22 +319,6 @@
 			};
 		};
 	};
-};
-
-&hs_phy_0 {		/* USB3 port 0 HS phy */
-	status = "okay";
-};
-
-&ss_phy_0 {		/* USB3 port 0 SS phy */
-	status = "okay";
-};
-
-&hs_phy_1 {		/* USB3 port 1 HS phy */
-	status = "okay";
-};
-
-&ss_phy_1 {		/* USB3 port 1 SS phy */
-	status = "okay";
 };
 
 &usb3_0 {
