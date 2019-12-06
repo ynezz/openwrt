@@ -1,0 +1,70 @@
+include:
+  - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/main.yml
+  - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/target.yml
+
+variables:
+  CI_TARGET_BUILD_CONFIG_EXTRA: CONFIG_TESTING_KERNEL=y
+
+
+.target build ipq40xx generic:
+  extends: .openwrt-target-build
+
+.target build x86 64:
+  extends: .openwrt-target-build
+
+
+
+.target build ath79 generic:
+  extends: .openwrt-target-build
+
+.target build ipq806x generic:
+  extends: .openwrt-target-build
+
+
+# bcm27xx
+target build bcm27xx bcm2708:
+  extends: .openwrt-target-build
+
+.target build bcm27xx bcm2709:
+  extends: .openwrt-target-build
+
+.target build bcm27xx bcm2710:
+  extends: .openwrt-target-build
+
+.target build bcm27xx bcm2711:
+  extends: .openwrt-target-build
+
+# sunxi
+.target build sunxi cortexa7:
+  extends: .openwrt-target-build
+
+
+# ramips
+.target build ramips mt7620:
+  extends: .openwrt-target-build
+
+.target build ramips mt7621:
+  extends: .openwrt-target-build
+
+.target build ramips mt76x8:
+  extends: .openwrt-target-build
+
+.target build ramips rt288x:
+  extends: .openwrt-target-build
+
+.target build ramips rt305x:
+  extends: .openwrt-target-build
+
+.target build ramips rt3883:
+  extends: .openwrt-target-build
+
+
+# mvebu
+.target build mvebu cortexa72:
+  extends: .openwrt-target-build
+
+.target build mvebu cortexa53:
+  extends: .openwrt-target-build
+
+.target build mvebu cortexa9:
+  extends: .openwrt-target-build
