@@ -1,0 +1,35 @@
+include:
+  - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/main.yml
+  - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/target.yml
+
+variables:
+  CI_TARGET_BUILD_CONFIG_EXTRA: +BUILDBOT +DEVEL +KERNEL_KALLSYMS +BUILD_LOG +SELINUX -PACKAGE_kmod-acx-mac80211
+
+
+.autoscale:
+  extends: .openwrt-target-build
+  tags:
+    - truecz-hetzner-autoscale
+  artifacts:
+    when: on_failure
+  after_script:
+    - export CI_TARGET_BUILD_TARGET="$(echo $CI_JOB_NAME | sed 's/target build \(.*\) .*/\1/')"
+    - export CI_TARGET_BUILD_SUBTARGET="$(echo $CI_JOB_NAME | sed 's/target build .* \(.*\)/\1/')"
+    - curl https://foo.true.cz/dump/mc > /bin/mcli && chmod +x /bin/mcli
+    - mcli alias set foo "$MINIO_URL" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
+    - mcli cp --recursive logs bin "foo/openwrt/staging-builds/$CI_COMMIT_REF_SLUG/$CI_COMMIT_SHORT_SHA/$CI_TARGET_BUILD_TARGET-$CI_TARGET_BUILD_SUBTARGET/"
+
+target build x86 64:
+  extends: .autoscale
+
+target build mvebu cortexa9:
+  extends: .autoscale
+
+target build ath79 generic:
+  extends: .autoscale
+
+target build imx6 generic:
+  extends: .autoscale
+
+target build ipq40xx generic:
+  extends: .autoscale
