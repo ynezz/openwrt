@@ -1,0 +1,24 @@
+include:
+  - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/main.yml
+  - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/target.yml
+
+variables:
+  CI_TARGET_BUILD_CONFIG_EXTRA: CONFIG_TESTING_KERNEL=y
+
+.target build ramips mt7620:
+  extends: .openwrt-target-build
+
+target build ramips mt7621:
+  extends: .openwrt-target-build
+
+.target build ramips rt305x:
+  extends: .openwrt-target-build
+
+.target build ramips mt76x8:
+  extends: .openwrt-target-build
+
+.target build ramips rt288x:
+  extends: .openwrt-target-build
+
+.target build ramips rt3883:
+  extends: .openwrt-target-build
