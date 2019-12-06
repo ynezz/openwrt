@@ -484,6 +484,9 @@
 
 		interrupt-parent = <&gic>;
 		interrupts = <GIC_SHARED 14 IRQ_TYPE_LEVEL_HIGH>;
+
+		#address-cells = <1>;
+		#size-cells = <0>;
 	};
 
 	bch: ecc@1e003800 {
