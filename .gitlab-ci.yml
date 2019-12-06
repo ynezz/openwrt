@@ -1,0 +1,203 @@
+include:
+  - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/main.yml
+  - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/target.yml
+
+variables:
+  CI_TARGET_BUILD_CONFIG_EXTRA: +BUILDBOT +DEVEL +KERNEL_KALLSYMS +BUILD_LOG +BPF_TOOLCHAIN_NONE +TESTING_KERNEL -IB -SDK -PACKAGE_kmod-acx-mac80211
+
+.truecz:
+  extends: .openwrt-target-build
+  tags:
+    - truecz-hetzner-autoscale
+
+.manual:
+  extends: .truecz
+  rules:
+    - when: manual
+
+.always:
+  extends: .truecz
+  rules:
+    - when: always
+
+
+.target build x86 64:
+  extends: .always
+
+.target build x86 generic:
+  extends: .always
+
+.target build x86 legacy:
+  extends: .always
+
+.target build x86 geode:
+  extends: .always
+
+.target build sunxi cortexa53:
+  extends: .always
+
+.target build sunxi cortexa7:
+  extends: .always
+
+.target build sunxi cortexa8:
+  extends: .always
+
+.target build imx6 generic:
+  extends: .openwrt-target-build
+
+.target build rockchip armv8:
+  extends: .openwrt-target-build
+
+.target build octeontx generic:
+  extends: .openwrt-target-build
+
+.target build at91 sama7:
+  variables:
+    CI_TARGET_BUILD_CONFIG_URL: http://sprunge.us/nGu5gP
+  extends: .manual
+
+# x86
+.target build x86 legacy:
+  extends: .openwrt-target-build
+
+.target build x86 generic:
+  extends: .openwrt-target-build
+
+.target build x86 geode:
+  extends: .openwrt-target-build
+
+.target build x86 legacy:
+  extends: .openwrt-target-build
+
+
+# ath79
+.target build ath79 generic:
+  extends: .openwrt-target-build
+
+.target build ath79 tiny:
+  extends: .openwrt-target-build
+
+.target build ath79 nand:
+  extends: .openwrt-target-build
+
+.target build ipq806x generic:
+  extends: .openwrt-target-build
+
+.target build kirkwood generic:
+  extends: .openwrt-target-build
+
+.target build archs38 generic:
+  extends: .openwrt-target-build
+
+.target build zynq generic:
+  extends: .openwrt-target-build
+
+.target build tegra generic:
+  extends: .openwrt-target-build
+
+
+# layerscape
+.target build layerscape armv8_64b:
+  extends: .openwrt-target-build
+
+.target build layerscape armv7:
+  extends: .openwrt-target-build
+
+
+# mpc85xx
+.target build mpc85xx generic:
+  extends: .openwrt-target-build
+
+.target build mpc85xx p1020:
+  extends: .openwrt-target-build
+
+.target build mpc85xx p2020:
+  extends: .openwrt-target-build
+
+
+# bcm27xx
+.target build bcm27xx bcm2708:
+  extends: .openwrt-target-build
+
+.target build bcm27xx bcm2709:
+  extends: .openwrt-target-build
+
+.target build bcm27xx bcm2710:
+  extends: .openwrt-target-build
+
+.target build bcm27xx bcm2711:
+  extends: .openwrt-target-build
+
+
+# sunxi
+.target build sunxi cortexa53:
+  extends: .openwrt-target-build
+
+.target build sunxi cortexa7:
+  extends: .openwrt-target-build
+
+.target build sunxi cortexa8:
+  extends: .openwrt-target-build
+
+
+# ramips
+.target build ramips mt7620:
+  extends: .openwrt-target-build
+
+.target build ramips mt7621:
+  extends: .manual
+  variables:
+    CI_TARGET_BUILD_CONFIG_URL: http://sprunge.us/wnt1Wh
+
+.target build ramips mt76x8:
+  extends: .openwrt-target-build
+
+.target build ramips rt288x:
+  extends: .openwrt-target-build
+
+.target build ramips rt305x:
+  extends: .openwrt-target-build
+
+.target build ramips rt3883:
+  extends: .openwrt-target-build
+
+
+# mxs
+.target build mxs generic:
+  extends: .openwrt-target-build
+
+
+# mvebu
+.target build mvebu cortexa72:
+  extends: .openwrt-target-build
+
+.target build mvebu cortexa53:
+  extends: .openwrt-target-build
+
+.target build mvebu cortexa9:
+  extends: .openwrt-target-build
+
+
+# realtek
+.target build realtek generic:
+  extends: .openwrt-target-build
+
+
+# qemu
+.target build armvirt 32:
+  extends: .openwrt-target-build
+
+.target build armvirt 64:
+  extends: .openwrt-target-build
+
+.target build malta be:
+  extends: .openwrt-target-build
+
+.target build malta be64:
+  extends: .openwrt-target-build
+
+.target build malta le:
+  extends: .openwrt-target-build
+
+.target build malta le64:
+  extends: .openwrt-target-build
