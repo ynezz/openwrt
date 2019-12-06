@@ -1,0 +1,184 @@
+include:
+  - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/main.yml
+  - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/target.yml
+
+variables:
+  CI_TARGET_BUILD_CONFIG_EXTRA: +BUILDBOT +DEVEL +KERNEL_KALLSYMS +TESTING_KERNEL +BUILD_LOG -IB -SDK -PACKAGE_kmod-acx-mac80211
+
+.manual:
+  extends: .openwrt-target-build
+  rules:
+    - when: manual
+  tags:
+    - truecz-hetzner-autoscale
+
+
+target build ipq40xx generic:
+  extends: .manual
+
+target build imx6 generic:
+  extends: .manual
+
+target build x86 64:
+  extends: .manual
+
+target build realtek generic:
+  extends: .manual
+
+target build mvebu cortexa9:
+  extends: .manual
+
+
+
+.target build imx6 generic:
+  extends: .openwrt-target-build
+
+.target build rockchip armv8:
+  extends: .openwrt-target-build
+
+.target build octeontx generic:
+  extends: .openwrt-target-build
+
+# x86
+.target build x86 legacy:
+  extends: .openwrt-target-build
+
+.target build x86 generic:
+  extends: .openwrt-target-build
+
+.target build x86 geode:
+  extends: .openwrt-target-build
+
+.target build x86 legacy:
+  extends: .openwrt-target-build
+
+
+# ath79
+.target build ath79 generic:
+  extends: .openwrt-target-build
+
+.target build ath79 tiny:
+  extends: .openwrt-target-build
+
+.target build ath79 nand:
+  extends: .openwrt-target-build
+
+.target build ipq806x generic:
+  extends: .openwrt-target-build
+
+.target build kirkwood generic:
+  extends: .openwrt-target-build
+
+.target build archs38 generic:
+  extends: .openwrt-target-build
+
+.target build zynq generic:
+  extends: .openwrt-target-build
+
+.target build tegra generic:
+  extends: .openwrt-target-build
+
+
+# layerscape
+.target build layerscape armv8_64b:
+  extends: .openwrt-target-build
+
+.target build layerscape armv7:
+  extends: .openwrt-target-build
+
+
+# mpc85xx
+.target build mpc85xx generic:
+  extends: .openwrt-target-build
+
+.target build mpc85xx p1020:
+  extends: .openwrt-target-build
+
+.target build mpc85xx p2020:
+  extends: .openwrt-target-build
+
+
+# bcm27xx
+.target build bcm27xx bcm2708:
+  extends: .openwrt-target-build
+
+.target build bcm27xx bcm2709:
+  extends: .openwrt-target-build
+
+.target build bcm27xx bcm2710:
+  extends: .openwrt-target-build
+
+.target build bcm27xx bcm2711:
+  extends: .openwrt-target-build
+
+
+# sunxi
+.target build sunxi cortexa53:
+  extends: .openwrt-target-build
+
+.target build sunxi cortexa7:
+  extends: .openwrt-target-build
+
+.target build sunxi cortexa8:
+  extends: .openwrt-target-build
+
+
+# ramips
+.target build ramips mt7620:
+  extends: .openwrt-target-build
+
+.target build ramips mt7621:
+  extends: .openwrt-target-build
+
+.target build ramips mt76x8:
+  extends: .openwrt-target-build
+
+.target build ramips rt288x:
+  extends: .openwrt-target-build
+
+.target build ramips rt305x:
+  extends: .openwrt-target-build
+
+.target build ramips rt3883:
+  extends: .openwrt-target-build
+
+
+# mxs
+.target build mxs generic:
+  extends: .openwrt-target-build
+
+
+# mvebu
+.target build mvebu cortexa72:
+  extends: .openwrt-target-build
+
+.target build mvebu cortexa53:
+  extends: .openwrt-target-build
+
+.target build mvebu cortexa9:
+  extends: .openwrt-target-build
+
+
+# realtek
+.target build realtek generic:
+  extends: .openwrt-target-build
+
+
+# qemu
+.target build armvirt 32:
+  extends: .openwrt-target-build
+
+.target build armvirt 64:
+  extends: .openwrt-target-build
+
+.target build malta be:
+  extends: .openwrt-target-build
+
+.target build malta be64:
+  extends: .openwrt-target-build
+
+.target build malta le:
+  extends: .openwrt-target-build
+
+.target build malta le64:
+  extends: .openwrt-target-build
