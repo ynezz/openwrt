@@ -397,19 +397,24 @@ define KernelPackage/video-core
   DEPENDS:=@PCI_SUPPORT||USB_SUPPORT +PACKAGE_kmod-i2c-core:kmod-i2c-core
   KCONFIG:= \
 	CONFIG_MEDIA_SUPPORT \
+	CONFIG_MEDIA_CONTROLLER=y \
 	CONFIG_MEDIA_CAMERA_SUPPORT=y \
 	CONFIG_VIDEO_DEV \
 	CONFIG_VIDEO_V4L1=y \
 	CONFIG_VIDEO_ALLOW_V4L1=y \
 	CONFIG_VIDEO_CAPTURE_DRIVERS=y \
+	CONFIG_V4L2_FWNODE \
 	CONFIG_V4L_USB_DRIVERS=y \
 	CONFIG_V4L_PCI_DRIVERS=y \
 	CONFIG_V4L_PLATFORM_DRIVERS=y \
-	CONFIG_V4L_ISA_PARPORT_DRIVERS=y
+	CONFIG_V4L_ISA_PARPORT_DRIVERS=y \
+	CONFIG_VIDEO_V4L2_SUBDEV_API=y
   FILES:= \
 	$(LINUX_DIR)/drivers/media/$(V4L2_DIR)/v4l2-common.ko \
-	$(LINUX_DIR)/drivers/media/$(V4L2_DIR)/videodev.ko
-  AUTOLOAD:=$(call AutoLoad,60, videodev v4l2-common)
+	$(LINUX_DIR)/drivers/media/$(V4L2_DIR)/v4l2-fwnode.ko \
+	$(LINUX_DIR)/drivers/media/$(V4L2_DIR)/videodev.ko \
+	$(LINUX_DIR)/drivers/media/media.ko
+  AUTOLOAD:=$(call AutoLoad,60, videodev v4l2-common v4l2-fwnode media)
 endef
 
 define KernelPackage/video-core/description
