@@ -10,6 +10,7 @@ VIDEO_MENU:=Video Support
 
 V4L2_DIR=v4l2-core
 V4L2_USB_DIR=usb
+V4L2_I2C_DIR=i2c
 
 #
 # Video Display
@@ -1030,3 +1031,18 @@ define KernelPackage/video-gspca-konica/description
 endef
 
 $(eval $(call KernelPackage,video-gspca-konica))
+
+
+define KernelPackage/video-ov5647
+  TITLE:=OmniVision OV5647 sensor support
+  KCONFIG:=CONFIG_VIDEO_OV5647
+  FILES:=$(LINUX_DIR)/drivers/media/$(V4L2_I2C_DIR)/ov5647.ko
+  AUTOLOAD:=$(call AutoProbe,ov5647)
+  $(call AddDepends/video)
+endef
+
+define KernelPackage/video-ov5647/description
+  This is a Video4Linux2 sensor driver for the OmniVision OV5647 camera.
+endef
+
+$(eval $(call KernelPackage,video-ov5647))
