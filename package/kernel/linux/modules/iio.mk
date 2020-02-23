@@ -306,6 +306,22 @@ endef
 $(eval $(call KernelPackage,iio-si7020))
 
 
+define KernelPackage/iio-sps30
+  SUBMENU:=$(IIO_MENU)
+  DEPENDS:=@!LINUX_4_14 +kmod-i2c-core +kmod-iio-core +kmod-industrialio-triggered-buffer +kmod-lib-crc8
+  TITLE:=Sensirion SPS30 particulate matter sensor
+  KCONFIG:=CONFIG_SPS30
+  FILES:=$(LINUX_DIR)/drivers/iio/chemical/sps30.ko
+  AUTOLOAD:=$(call AutoProbe,sps30)
+endef
+
+define KernelPackage/iio-sps30/description
+ Support for the Sensirion SPS30 particulate matter sensor.
+endef
+
+$(eval $(call KernelPackage,iio-sps30))
+
+
 define KernelPackage/iio-tsl4531
   SUBMENU:=$(IIO_MENU)
   DEPENDS:=+kmod-i2c-core +kmod-iio-core
