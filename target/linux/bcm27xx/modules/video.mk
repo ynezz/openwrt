@@ -24,6 +24,21 @@ endef
 $(eval $(call KernelPackage,camera-bcm2835))
 
 
+define KernelPackage/bcm2835-unicam
+  TITLE:=Broadcom BCM2835 Unicam video capture driver
+  KCONFIG:=CONFIG_VIDEO_BCM2835_UNICAM
+  FILES:=$(LINUX_DIR)/drivers/media/platform/bcm2835/bcm2835-unicam.ko
+  AUTOLOAD:=$(call AutoLoad,65,bcm2835-unicam)
+  $(call AddDepends/video,@TARGET_bcm27xx +kmod-video-videobuf2)
+endef
+
+define KernelPackage/camera-bcm2835/description
+  V4L2 subdevice for CSI2 receiver, that interfaces directly to the VC4 peripheral.
+endef
+
+$(eval $(call KernelPackage,bcm2835-unicam))
+
+
 define KernelPackage/drm-vc4
   SUBMENU:=$(VIDEO_MENU)
   TITLE:=Broadcom VC4 Graphics
