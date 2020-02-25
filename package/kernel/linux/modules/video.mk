@@ -412,6 +412,7 @@ define KernelPackage/video-core
 	CONFIG_VIDEO_V4L2_SUBDEV_API=y
   FILES:= \
 	$(LINUX_DIR)/drivers/media/$(V4L2_DIR)/v4l2-common.ko \
+	$(LINUX_DIR)/drivers/media/$(V4L2_DIR)/v4l2-dv-timings.ko \
 	$(LINUX_DIR)/drivers/media/$(V4L2_DIR)/v4l2-fwnode.ko \
 	$(LINUX_DIR)/drivers/media/$(V4L2_DIR)/videodev.ko \
 	$(LINUX_DIR)/drivers/media/media.ko
