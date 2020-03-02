@@ -1,0 +1,56 @@
+From c9276f0c0560628631feb82e81fcbda510c1b973 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Tue, 3 Mar 2020 00:07:45 +0100
+Subject: [PATCH] ARM: dts: imx6q-apalis: ixora: add GPIO line names
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+For convenient libgpiod use.
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ arch/arm/boot/dts/imx6q-apalis-ixora.dts | 32 ++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
+
+--- a/arch/arm/boot/dts/imx6q-apalis-ixora.dts
++++ b/arch/arm/boot/dts/imx6q-apalis-ixora.dts
+@@ -147,6 +147,38 @@
+ 	};
+ };
+ 
++&gpio1 {
++        gpio-line-names =
++                "USB Host VBUS", "", "", "", "Wake Up", "", "", "",
++                "", "", "", "", "", "", "", "",
++                "Reset Button", "LED 4 Green", "", "", "", "LED 4 Red", "", "",
++                "", "PHY Reset", "", "", "PCIe Reset", "", "", "";
++};
++
++&gpio2 {
++        gpio-line-names =
++                "", "LED 5 Green", "LED 5 Red", "", "", "", "", "",
++                "", "", "", "", "", "", "", "",
++                "", "", "", "", "", "", "", "",
++                "", "", "", "", "", "", "", "";
++};
++
++&gpio3 {
++        gpio-line-names =
++                "", "", "", "", "", "", "", "",
++                "", "", "", "", "", "", "", "",
++                "", "", "", "", "", "", "USB OTG VBUS", "",
++                "", "", "", "", "USB Host VBUS Hub", "", "", "";
++};
++
++&gpio6 {
++        gpio-line-names =
++                "", "", "", "", "", "", "", "",
++                "", "", "", "", "", "", "SD1 CD", "",
++                "", "", "", "", "", "", "", "",
++                "", "", "", "", "", "", "", "";
++};
++
+ &backlight {
+ 	brightness-levels = <0 127 191 223 239 247 251 255>;
+ 	default-brightness-level = <1>;
