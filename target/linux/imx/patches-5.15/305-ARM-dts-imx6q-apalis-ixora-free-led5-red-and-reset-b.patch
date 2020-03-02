@@ -1,0 +1,50 @@
+From d420d45c610f8b5f3e4439331595f082f1e5772c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Tue, 3 Mar 2020 15:27:03 +0100
+Subject: [PATCH] ARM: dts: imx6q-apalis: ixora: free led5-red and reset button
+ for testing
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ arch/arm/boot/dts/imx6q-apalis-ixora.dts | 13 -------------
+ 1 file changed, 13 deletions(-)
+
+--- a/arch/arm/boot/dts/imx6q-apalis-ixora.dts
++++ b/arch/arm/boot/dts/imx6q-apalis-ixora.dts
+@@ -61,7 +61,6 @@
+ 		rtc0 = &rtc_i2c;
+ 		rtc1 = &snvs_rtc;
+ 		led-boot = &led_boot;
+-		led-failsafe = &led_failsafe;
+ 		led-running = &led_running;
+ 		led-upgrade = &led_upgrade;
+ 	};
+@@ -82,13 +81,6 @@
+ 			debounce-interval = <10>;
+ 			wakeup-source;
+ 		};
+-
+-		reset {
+-			label = "reset";
+-			gpios = <&gpio1 16 GPIO_ACTIVE_LOW>;
+-			linux,code = <KEY_RESTART>;
+-			debounce-interval = <10>;
+-		};
+ 	};
+ 
+ 	lcd_display: disp0 {
+@@ -152,11 +144,6 @@
+ 			label = "LED_5_GREEN";
+ 			gpios = <&gpio2 1 GPIO_ACTIVE_HIGH>;
+ 		};
+-
+-		led_failsafe: led5-red {
+-			label = "LED_5_RED";
+-			gpios = <&gpio2 2 GPIO_ACTIVE_HIGH>;
+-		};
+ 	};
+ };
+ 

@@ -1,0 +1,27 @@
+From 8dcfd8592da10896356cea666ac77f903e443242 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Tue, 3 Mar 2020 14:58:32 +0100
+Subject: [PATCH] ARM: dts: imx6q-apalis: ixora: add Sensirion SPS30 node
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ arch/arm/boot/dts/imx6q-apalis-ixora.dts | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+--- a/arch/arm/boot/dts/imx6q-apalis-ixora.dts
++++ b/arch/arm/boot/dts/imx6q-apalis-ixora.dts
+@@ -192,6 +192,11 @@
+ 		compatible = "st,m41t0";
+ 		reg = <0x68>;
+ 	};
++
++	air-pollution-sensor@69 {
++		compatible = "sensirion,sps30";
++		reg = <0x69>;
++	};
+ };
+ 
+ /*

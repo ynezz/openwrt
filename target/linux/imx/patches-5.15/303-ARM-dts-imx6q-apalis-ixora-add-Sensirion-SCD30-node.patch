@@ -1,0 +1,33 @@
+From f0725b0a5d7599e64293630878bb96b7350956be Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Mon, 8 Feb 2021 17:10:30 +0100
+Subject: [PATCH] ARM: dts: imx6q-apalis: ixora: add Sensirion SCD30 node
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ arch/arm/boot/dts/imx6q-apalis-ixora.dts | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/arch/arm/boot/dts/imx6q-apalis-ixora.dts b/arch/arm/boot/dts/imx6q-apalis-ixora.dts
+index de363b06ff35..7876f6e00a0c 100644
+--- a/arch/arm/boot/dts/imx6q-apalis-ixora.dts
++++ b/arch/arm/boot/dts/imx6q-apalis-ixora.dts
+@@ -197,6 +197,15 @@
+ 		compatible = "sensirion,sps30";
+ 		reg = <0x69>;
+ 	};
++
++	/* RDY = ixora/gpio1/pin13 = MX6QDL_PAD_NANDF_D4__GPIO2_IO04 */
++	co2-sensor@61 {
++		compatible = "sensirion,scd30";
++		reg = <0x61>;
++		vdd-supply = <&reg_module_3v3>;
++		interrupt-parent = <&gpio2>;
++		interrupts = <4 IRQ_TYPE_LEVEL_HIGH>;
++	};
+ };
+ 
+ /*
