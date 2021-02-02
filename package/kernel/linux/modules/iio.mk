@@ -427,6 +427,58 @@ endef
 $(eval $(call KernelPackage,iio-lsm6dsx-spi))
 
 
+define KernelPackage/iio-scd30-core
+  SUBMENU:=$(IIO_MENU)
+  DEPENDS:=+kmod-iio-core +kmod-industrialio-triggered-buffer
+  TITLE:=Sensirion SCD30 carbon dioxide sensor core driver
+  KCONFIG:=CONFIG_SCD30_CORE
+  FILES:=$(LINUX_DIR)/drivers/iio/chemical/scd30_core.ko
+endef
+
+define KernelPackage/iio-scd30-core/description
+ Support for the Sensirion SCD30 carbon dioxide sensor with onboard SHT31 for
+ temperature and relative humidity measurements.
+endef
+
+$(eval $(call KernelPackage,iio-scd30-core))
+
+
+define KernelPackage/iio-scd30-i2c
+  SUBMENU:=$(IIO_MENU)
+  DEPENDS:=+kmod-iio-core +kmod-i2c-core +kmod-industrialio-triggered-buffer \
+	   +kmod-iio-scd30-core +kmod-lib-crc8
+  TITLE:=Sensirion SCD30 I2C interface driver
+  KCONFIG:=CONFIG_SCD30_I2C
+  FILES:=$(LINUX_DIR)/drivers/iio/chemical/scd30_i2c.ko
+  AUTOLOAD:=$(call AutoProbe,scd30_i2c)
+endef
+
+define KernelPackage/iio-scd30-i2c/description
+ Support for the Sensirion SCD30 carbon dioxide sensor with onboard SHT31 for
+ temperature and relative humidity measurements. Sensor is connected to I2C bus.
+endef
+
+$(eval $(call KernelPackage,iio-scd30-i2c))
+
+
+define KernelPackage/iio-scd30-serial
+  SUBMENU:=$(IIO_MENU)
+  DEPENDS:=+kmod-iio-core +kmod-industrialio-triggered-buffer \
+	   +kmod-iio-scd30-core +kmod-serdev +kmod-lib-crc16
+  TITLE:=Sensirion SCD30 serial interface driver
+  KCONFIG:=CONFIG_SCD30_SERIAL
+  FILES:=$(LINUX_DIR)/drivers/iio/chemical/scd30_serial.ko
+  AUTOLOAD:=$(call AutoProbe,scd30_serial)
+endef
+
+define KernelPackage/iio-scd30-serial/description
+ Support for the Sensirion SCD30 carbon dioxide sensor with onboard SHT31 for
+ temperature and relative humidity measurements. Sensor is connected to serial bus.
+endef
+
+$(eval $(call KernelPackage,iio-scd30-serial))
+
+
 define KernelPackage/iio-sps30
   SUBMENU:=$(IIO_MENU)
   DEPENDS:=+kmod-i2c-core +kmod-iio-core +kmod-industrialio-triggered-buffer +kmod-lib-crc8
