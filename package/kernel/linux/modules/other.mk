@@ -30,7 +30,8 @@ $(eval $(call KernelPackage,6lowpan))
 define KernelPackage/bluetooth
   SUBMENU:=$(OTHER_MENU)
   TITLE:=Bluetooth support
-  DEPENDS:=@USB_SUPPORT +kmod-usb-core +kmod-crypto-hash +kmod-crypto-ecb +kmod-lib-crc16 +kmod-hid +kmod-crypto-cmac +kmod-regmap-core +kmod-crypto-ecdh
+  DEPENDS:=@USB_SUPPORT +kmod-serdev +kmod-usb-core +kmod-crypto-hash +kmod-crypto-ecb \
+	+kmod-lib-crc16 +kmod-hid +kmod-crypto-cmac +kmod-regmap-core +kmod-crypto-ecdh
   KCONFIG:= \
 	CONFIG_BT \
 	CONFIG_BT_BREDR=y \
@@ -1307,6 +1308,7 @@ endef
 
 $(eval $(call KernelPackage,mhi-bus))
 
+
 define KernelPackage/mhi-pci-generic
   SUBMENU:=$(OTHER_MENU)
   TITLE:=MHI PCI controller driver
@@ -1321,3 +1323,20 @@ define KernelPackage/mhi-pci-generic/description
 endef
 
 $(eval $(call KernelPackage,mhi-pci-generic))
+
+
+define KernelPackage/serdev
+  SUBMENU:=$(OTHER_MENU)
+  TITLE:=Core support for devices connected via a serial port.
+  KCONFIG:=\
+	CONFIG_SERIAL_DEV_BUS \
+	CONFIG_RAVE_SP_CORE=n
+  FILES:=$(LINUX_DIR)/drivers/tty/serdev/serdev.ko
+  AUTOLOAD:=$(call AutoProbe,serdev,1)
+endef
+
+define KernelPackage/serdev/description
+  Kernel module with core support for devices connected via a serial port.
+endef
+
+$(eval $(call KernelPackage,serdev))
