@@ -585,6 +585,94 @@ sub gen_usergroup_list() {
 	}
 }
 
+sub gen_package_depschart() {
+	my $package_deps;
+	my @implicit_deps = ("libc", "libssp", "libpthread", "librt");
+	parse_package_metadata($ARGV[0]) or exit 1;
+	foreach my $name (sort {uc($a) cmp uc($b)} keys %package) {
+		my %depends;
+		my $pkg = $package{$name};
+		foreach my $dep (@{$pkg->{depends} || []}) {
+			if ($dep =~ m!^\+?(?:[^:]+:)?([^@]+)$!) {
+				$depends{$1}++;
+			}
+		}
+		my @depends = sort keys %depends;
+		if (@depends > 0) {
+			foreach my $n (@{$pkg->{provides}}) {
+				foreach my $d (@depends) {
+					next if (grep {$_ eq $d} @implicit_deps);
+					$package_deps = "${package_deps}        \"${n}\" -> \"${d}\"\n";
+				}
+			}
+		}
+	}
+	my $html = <<"END_HTML";
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>OpenWrt package dependencies</title>
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <style type="text/css">
+    html, body { height: 100%; }
+    #package-dependencies { height: 100%; }
+  </style>
+</head>
+
+<body>
+  <div id="package-dependencies"></div>
+  <script type="text/javascript">
+    var package_deps = `digraph {
+$package_deps
+}`;
+
+    var edgeWeights = Array();
+    var parsedData = vis.parseDOTNetwork(package_deps);
+    var options = parsedData.options;
+
+    parsedData.edges.forEach(
+      function (edge, idx, arr) {
+        if (!edgeWeights[edge.to])
+          edgeWeights[edge.to] = 1;
+        else
+          edgeWeights[edge.to] += 1;
+      }
+    )
+
+    parsedData.nodes.forEach(
+      function (node, idx, arr) {
+        node.group = idx;
+        node.value = edgeWeights[node.id]
+        if (edgeWeights[node.id] > 1)
+          node.label = `\${node.label} (\${edgeWeights[node.id]})`
+      }
+    )
+
+    var container = document.getElementById("package-dependencies");
+    var data = {
+      nodes: parsedData.nodes,
+      edges: parsedData.edges,
+    };
+    var options = {
+      nodes: {
+        shape: "dot",
+        scaling: { min: 2, max: 10 }
+      },
+      edges: {
+        color: { inherit: true },
+        width: 0.2,
+      },
+      physics: false
+    };
+    var network = new vis.Network(container, data, options);
+  </script>
+</body>
+</html>
+END_HTML
+	print $html;
+}
+
 sub parse_command() {
 	GetOptions("ignore=s", \@ignore);
 	my $cmd = shift @ARGV;
@@ -594,6 +682,7 @@ sub parse_command() {
 		/^kconfig/ and return gen_kconfig_overrides();
 		/^source$/ and return gen_package_source();
 		/^pkgaux$/ and return gen_package_auxiliary();
+		/^dependency_chart$/ and return gen_package_depschart();
 		/^license$/ and return gen_package_license(0);
 		/^licensefull$/ and return gen_package_license(1);
 		/^usergroup$/ and return gen_usergroup_list();
@@ -606,6 +695,7 @@ Available Commands:
 	$0 kconfig [file] [config] [patchver]	Kernel config overrides
 	$0 source [file] 			Package source file information
 	$0 pkgaux [file]			Package auxiliary variables in makefile format
+	$0 dependency_chart [file]		Package dependency chart
 	$0 license [file] 			Package license information
 	$0 licensefull [file] 			Package license information (full list)
 	$0 usergroup [file]			Package usergroup allocation list
