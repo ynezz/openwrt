@@ -642,10 +642,13 @@ $package_deps
 
     parsedData.nodes.forEach(
       function (node, idx, arr) {
-        node.group = idx;
-        node.value = edgeWeights[node.id]
-        if (edgeWeights[node.id] > 1)
+        node.value = 0
+        node.group = idx
+
+        if (edgeWeights[node.id] > 1) {
           node.label = `\${node.label} (\${edgeWeights[node.id]})`
+          node.value = edgeWeights[node.id]
+        }
       }
     )
 
@@ -657,20 +660,59 @@ $package_deps
     var options = {
       nodes: {
         shape: "dot",
-        scaling: { min: 2, max: 10 }
+        scaling: { min: 5 }
       },
       edges: {
         color: { inherit: true },
         width: 0.2,
       },
-      physics: false
+      physics: {
+        solver: 'forceAtlas2Based',
+        forceAtlas2Based: {
+          avoidOverlap: 1
+        }
+      },
+      layout: {
+        randomSeed: 1922
+      }
     };
+
     var network = new vis.Network(container, data, options);
   </script>
 </body>
 </html>
 END_HTML
 	print $html;
+}
+
+sub gen_package_json() {
+	my $json;
+	parse_package_metadata($ARGV[0]) or exit 1;
+	foreach my $name (sort {uc($a) cmp uc($b)} keys %package) {
+		my %depends;
+		my $pkg = $package{$name};
+		foreach my $dep (@{$pkg->{depends} || []}) {
+			if ($dep =~ m!^\+?(?:[^:]+:)?([^@]+)$!) {
+				$depends{$1}++;
+			}
+		}
+		my @depends = sort keys %depends;
+		my $pkg_deps = join ' ', map { qq/"$_",/ } @depends;
+		$pkg_deps =~ s/\,$//;
+
+		$json = <<"END_JSON";
+${json}{
+"name":"$name",
+"version":"$pkg->{version}",
+"category":"$pkg->{category}",
+"license":"$pkg->{license}",
+"depends":[$pkg_deps]},
+END_JSON
+	}
+
+	$json =~ s/[\n\r]//g;
+	$json =~ s/\,$//;
+	print "[$json]";
 }
 
 sub parse_command() {
@@ -682,6 +724,7 @@ sub parse_command() {
 		/^kconfig/ and return gen_kconfig_overrides();
 		/^source$/ and return gen_package_source();
 		/^pkgaux$/ and return gen_package_auxiliary();
+		/^pkgjson$/ and return gen_package_json();
 		/^dependency_chart$/ and return gen_package_depschart();
 		/^license$/ and return gen_package_license(0);
 		/^licensefull$/ and return gen_package_license(1);
