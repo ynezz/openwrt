@@ -5,7 +5,8 @@ board=$(board_name)
 board_config_update
 
 case "$board" in
-technexion,imx7d-pico-pi)
+technexion,imx7d-pico-pi|\
+toradex,colibri-imx6ull-aster)
 	ucidef_set_interface_lan "eth0"
 	;;
 *)

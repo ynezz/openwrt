@@ -1,0 +1,72 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Oleksandr Suvorov <oleksandr.suvorov@toradex.com>
+Date: Thu, 13 May 2021 23:09:35 +0300
+Subject: [PATCH] Makefile: add u-boot-nand.imx target
+
+NAND modules (Colibri Vybrid, iMX7, iMX6ULL) require the images with
+1024 prepending bytes.
+Add the u-boot-nand.imx target which enables with CONFIG_IMX_NAND
+option.
+
+Signed-off-by: Oleksandr Suvorov <oleksandr.suvorov@toradex.com>
+---
+ Makefile                   | 4 ++++
+ arch/arm/config.mk         | 4 ++++
+ arch/arm/mach-imx/Makefile | 8 ++++++++
+ 3 files changed, 16 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index 7b526f4f5a88..3e3e6ff9ffab 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1166,6 +1166,10 @@ ifeq ($(CONFIG_MULTI_DTB_FIT),y)
+ IMX_DEPS = u-boot-fit-dtb.bin
+ endif
+ 
++u-boot-nand.imx: u-boot.imx
++	$(Q)$(MAKE) $(build)=arch/arm/mach-imx $@
++	$(BOARD_SIZE_CHECK)
++
+ %.imx: $(IMX_DEPS) %.bin
+ 	$(Q)$(MAKE) $(build)=arch/arm/mach-imx $@
+ 	$(BOARD_SIZE_CHECK)
+diff --git a/arch/arm/config.mk b/arch/arm/config.mk
+index 4153f7e37130..5993827cdd66 100644
+--- a/arch/arm/config.mk
++++ b/arch/arm/config.mk
+@@ -157,12 +157,16 @@ ifndef CONFIG_SPL_BUILD
+ INPUTS-y += SPL
+ endif
+ else
++ifeq ($(CONFIG_IMX_NAND),y)
++ALL-y += u-boot-nand.imx
++else
+ ifeq ($(CONFIG_OF_SEPARATE),y)
+ INPUTS-y += u-boot-dtb.imx
+ else
+ INPUTS-y += u-boot.imx
+ endif
+ endif
++endif
+ ifneq ($(CONFIG_VF610),)
+ INPUTS-y += u-boot.vyb
+ endif
+diff --git a/arch/arm/mach-imx/Makefile b/arch/arm/mach-imx/Makefile
+index e6b4654cd358..a2fdbdd6387c 100644
+--- a/arch/arm/mach-imx/Makefile
++++ b/arch/arm/mach-imx/Makefile
+@@ -121,6 +121,14 @@ u-boot.imx: MKIMAGEOUTPUT = u-boot.imx.log
+ u-boot.imx: u-boot.bin u-boot.cfgout $(PLUGIN).bin FORCE
+ 	$(call if_changed,mkimage)
+ 
++ifeq ($(CONFIG_IMX_NAND),y)
++cmd_u-boot-nand_imx = (dd bs=1024 count=1 if=/dev/zero 2>/dev/null) | \
++	cat - $< > $@
++
++u-boot-nand.imx: u-boot.imx FORCE
++	$(call if_changed,u-boot-nand_imx)
++endif
++
+ ifeq ($(CONFIG_MULTI_DTB_FIT),y)
+ MKIMAGEFLAGS_u-boot-dtb.imx = -n $(filter-out $(PLUGIN).bin $< $(PHONY),$^) \
+ 	-T $(IMAGE_TYPE) -e $(CONFIG_SYS_TEXT_BASE)

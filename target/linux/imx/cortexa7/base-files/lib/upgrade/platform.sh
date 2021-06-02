@@ -4,7 +4,8 @@ RAMFS_COPY_BIN='blkid jffs2reset'
 
 enable_image_metadata_check() {
 	case "$(board_name)" in
-	technexion,imx7d-pico-pi)
+	technexion,imx7d-pico-pi|\
+	toradex,colibri-imx6ull-aster)
 		REQUIRE_IMAGE_METADATA=1
 		;;
 	esac
@@ -15,7 +16,8 @@ platform_check_image() {
 	local board=$(board_name)
 
 	case "$board" in
-	technexion,imx7d-pico-pi)
+	technexion,imx7d-pico-pi|\
+	toradex,colibri-imx6ull-aster)
 		return 0
 		;;
 	esac
@@ -30,6 +32,9 @@ platform_do_upgrade() {
 	case "$board" in
 	technexion,imx7d-pico-pi)
 		imx_sdcard_do_upgrade "$1"
+		;;
+	toradex,colibri-imx6ull-aster)
+		nand_do_upgrade "$1"
 		;;
 	esac
 }

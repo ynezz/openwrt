@@ -28,6 +28,14 @@ define U-Boot/apalis_imx6
   BUILD_DEVICES:=toradex_apalis
 endef
 
+define U-Boot/colibri-imx6ull
+  NAME:=Toradex Colibri iMX6ULL
+  UBOOT_IMAGE:=u-boot-nand.imx
+  UBOOT_MAKE_FLAGS+=u-boot-nand.imx CONFIG_IMX_NAND=y
+  BUILD_SUBTARGET:=cortexa7
+  BUILD_DEVICES:=colibri-imx6ull
+endef
+
 define U-Boot/mx6cuboxi
   NAME:=SolidRun Cubox-i boards
   UBOOT_IMAGE:=SPL u-boot-dtb.img
@@ -52,6 +60,7 @@ endef
 
 UBOOT_TARGETS := \
 	apalis_imx6 \
+	colibri-imx6ull \
 	mx6cuboxi \
 	pico-pi-imx7d \
 	wandboard
