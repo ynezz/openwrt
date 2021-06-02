@@ -9,6 +9,9 @@ platform_do_upgrade() {
 	local board=$(board_name)
 
 	case "$board" in
+	toradex,colibri-imx6ull-aster)
+		nand_do_upgrade "$1"
+		;;
 	*)
 		default_do_upgrade "$1"
 		;;
