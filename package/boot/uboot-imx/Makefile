@@ -7,10 +7,10 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_VERSION:=2021.04
+PKG_VERSION:=2021.07-rc3
 PKG_RELEASE:=1
 
-PKG_HASH:=0d438b1bb5cceb57a18ea2de4a0d51f7be5b05b98717df05938636e0aadfe11a
+PKG_HASH:=1f64505dfb83bf63f3bf335bc4c284d1414caaf0f421d23fe3d9baddae086203
 
 include $(INCLUDE_DIR)/u-boot.mk
 include $(INCLUDE_DIR)/package.mk
