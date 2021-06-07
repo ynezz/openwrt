@@ -8,18 +8,20 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libgpiod
-PKG_VERSION:=1.4.4
-PKG_RELEASE:=1
+PKG_VERSION:=2021-06-07
+PKG_RELEASE:=$(AUTORELEASE)
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_SOURCE_URL:=@KERNEL/software/libs/libgpiod/
-PKG_HASH:=f1cda2789e6a13a92aefc012a76e5a7cc57a1b402d66f71df8719ee314b67699
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git
+PKG_SOURCE_VERSION:=9783bd64d28316cf9ee351ffc238ce7890e4a799
+PKG_MIRROR_HASH:=d166d382c673d7faf73e4f21f815f3e74ff49ba822dcc4ad44839d7d3378db5d
 
 PKG_MAINTAINER:=Michael Heimpold <mhei@heimpold.de>
 PKG_LICENSE:=LGPL-2.1-or-later
 PKG_LICENSE_FILES:=COPYING
 
 PKG_INSTALL:=1
+PKG_FIXUP:=autoreconf
 PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
