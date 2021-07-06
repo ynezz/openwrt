@@ -3,31 +3,22 @@ include:
   - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/target.yml
 
 variables:
-  CI_TARGET_BUILD_CONFIG_EXTRA: +BUILDBOT +DEVEL +KERNEL_KALLSYMS +TESTING_KERNEL +BUILD_LOG -IB -SDK -PACKAGE_kmod-acx-mac80211
+  CI_TARGET_BUILD_CONFIG_EXTRA: +BUILDBOT +DEVEL +KERNEL_KALLSYMS +BUILD_LOG -IB -SDK -PACKAGE_kmod-acx-mac80211
 
 .manual:
   extends: .openwrt-target-build
-  rules:
-    - when: manual
+  #rules:
+  #  - when: manual
+  artifacts:
+    when: on_failure
   tags:
     - truecz-hetzner-autoscale
-
 
 target build ipq40xx generic:
   extends: .manual
 
-target build imx6 generic:
+target build ath25 generic:
   extends: .manual
-
-target build x86 64:
-  extends: .manual
-
-target build realtek generic:
-  extends: .manual
-
-target build mvebu cortexa9:
-  extends: .manual
-
 
 
 .target build imx6 generic:
