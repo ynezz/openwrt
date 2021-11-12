@@ -1150,6 +1150,25 @@ endef
 $(eval $(call KernelPackage,gpio-beeper))
 
 
+define KernelPackage/pwm-beeper
+  SUBMENU:=$(OTHER_MENU)
+  TITLE:=PWM beeper support
+  DEPENDS:=+kmod-input-core @PWM_SUPPORT
+  KCONFIG:= \
+	CONFIG_INPUT_MISC=y \
+	CONFIG_INPUT_PWM_BEEPER
+  FILES:= \
+	$(LINUX_DIR)/drivers/input/misc/pwm-beeper.ko
+  AUTOLOAD:=$(call AutoLoad,50,pwm-beeper)
+endef
+
+define KernelPackage/gpio-beeper/description
+ This enables playing beeps through PWM based beeper devices.
+endef
+
+$(eval $(call KernelPackage,pwm-beeper))
+
+
 define KernelPackage/echo
   SUBMENU:=$(OTHER_MENU)
   TITLE:=Line Echo Canceller
