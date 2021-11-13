@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Thu, 11 Nov 2021 16:51:06 +0100
+Subject: [PATCH] spi: spidev: remove buggy DT warning log splat
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ drivers/spi/spidev.c | 9 ---------
+ 1 file changed, 9 deletions(-)
+
+diff --git a/drivers/spi/spidev.c b/drivers/spi/spidev.c
+index 4f70022d142e..23d66e910005 100644
+--- a/drivers/spi/spidev.c
++++ b/drivers/spi/spidev.c
+@@ -733,15 +733,6 @@ static int spidev_probe(struct spi_device *spi)
+ 	int			status;
+ 	unsigned long		minor;
+ 
+-	/*
+-	 * spidev should never be referenced in DT without a specific
+-	 * compatible string, it is a Linux implementation thing
+-	 * rather than a description of the hardware.
+-	 */
+-	WARN(spi->dev.of_node &&
+-	     of_device_is_compatible(spi->dev.of_node, "spidev"),
+-	     "%pOF: buggy DT: spidev listed directly in DT\n", spi->dev.of_node);
+-
+ 	spidev_probe_acpi(spi);
+ 
+ 	/* Allocate driver data */
