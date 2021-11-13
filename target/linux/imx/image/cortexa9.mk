@@ -161,6 +161,21 @@ define Device/toradex_apalis
 endef
 TARGET_DEVICES += toradex_apalis
 
+define Device/gaben_flexisbc
+  $(Device/toradex_apalis)
+  DEVICE_TITLE := Gaben FlexiSBC
+  SUPPORTED_DEVICES := gaben,flexisbc
+  DEVICE_DTS := imx6q-apalis-gaben-flexisbc
+  BOOT_SCRIPT := bootscript-gaben_flexisbc
+  # UBOOT := gaben_flexisbc
+  DEVICE_PACKAGES := \
+	kmod-can kmod-can-flexcan kmod-can-raw kmod-pps-gpio \
+	kmod-leds-gpio kmod-leds-pwm kmod-backlight-pwm kmod-pwm-beeper \
+	kmod-rtc-ds1307 kmod-ledtrig-heartbeat kmod-gpio-mcp23s08 \
+	kmod-input-gpio-keys kmod-hwmon-lm75 kmod-input-evdev
+endef
+TARGET_DEVICES += gaben_flexisbc
+
 define Device/wandboard_dual
   DEVICE_VENDOR := Wandboard
   DEVICE_MODEL := Dual

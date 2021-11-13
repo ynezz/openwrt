@@ -1,0 +1,60 @@
+echo "Running Gaben FlexiSBC recovery script v1.0"
+
+drive=0
+interface=usb
+uboot_img=u-boot-with-spl.imx
+src_dir=openwrt-gaben-flexisbc
+owrt_img=openwrt-imx6-gaben_flexisbc-squashfs.combined.bin
+
+if gpio input $btn3_gpio; then
+	echo "Flashing from USB flash"
+
+	run led_blue_off
+	run led_blue_on
+	sleep 1
+	run led_blue_off
+	sleep 1
+
+	run led_blue_on
+
+	if load ${interface} ${drive}:1 ${loadaddr} ${src_dir}/${uboot_img}; then
+		run led_blue_off
+		echo "Flashing ${uboot_img}"
+		mmc dev 0 1 && run set_blkcnt && mmc write ${loadaddr} 2 ${blkcnt}
+	fi
+
+	run led_blue_on
+
+	if load ${interface} ${drive}:1 ${loadaddr} ${src_dir}/${owrt_img}; then
+		run led_blue_off
+		echo "Flashing ${owrt_img}"
+		mmc dev 0 0 && run set_blkcnt && mmc write ${loadaddr} 0 ${blkcnt}
+	fi
+
+	run led_green_on
+	sleep 1
+	run led_green_off
+	sleep 1
+	run led_green_on
+	sleep 1
+	run led_green_off
+	reset
+fi
+
+echo "Flashing from USB bootloader"
+
+# flash u-boot-with-spl.imx
+# using fixed size of 1M for U-Boot + SPL
+mmc dev 0 1
+mmc write 0x12100000 0x2 0x800
+
+# flash openwrt-imx6-apalis-squashfs.combined.bin
+run set_blkcnt
+mmc dev 0 0
+mmc write 0x12500000 0 ${blkcnt}
+
+mmc bootbus 0 2 0 1 && mmc partconf 0 1 1 0
+env default -f -a
+saveenv
+
+reset

@@ -48,6 +48,7 @@ gw,imx6q-gw5913)
 		ubootenv_add_uci_config /dev/mmcblk0 0xd1400 0x20000
 	fi
 	;;
+gaben,flexisbc|\
 toradex,apalis_imx6q-eval|\
 toradex,apalis_imx6q-ixora|\
 toradex,apalis_imx6q-ixora-v1.1)

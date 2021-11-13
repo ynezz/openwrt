@@ -8,6 +8,7 @@ RAMFS_COPY_BIN='blkid jffs2reset'
 
 enable_image_metadata_check() {
 	case "$(board_name)" in
+	gaben,flexisbc|\
 	toradex,apalis_imx6q-eval|\
 	toradex,apalis_imx6q-ixora|\
 	toradex,apalis_imx6q-ixora-v1.1)
@@ -49,6 +50,7 @@ platform_check_image() {
 		nand_do_platform_check $board $1
 		return $?;
 		;;
+	gaben,flexisbc |\
 	toradex,apalis_imx6q-eval|\
 	toradex,apalis_imx6q-ixora|\
 	toradex,apalis_imx6q-ixora-v1.1)
@@ -91,6 +93,7 @@ platform_do_upgrade() {
 	gw,imx6q-gw5913)
 		nand_do_upgrade "$1"
 		;;
+	gaben,flexisbc|\
 	toradex,apalis_imx6q-eval|\
 	toradex,apalis_imx6q-ixora|\
 	toradex,apalis_imx6q-ixora-v1.1)
@@ -103,6 +106,7 @@ platform_copy_config() {
 	local board=$(board_name)
 
 	case "$board" in
+	gaben,flexisbc|\
 	toradex,apalis_imx6q-eval|\
 	toradex,apalis_imx6q-ixora|\
 	toradex,apalis_imx6q-ixora-v1.1)
@@ -115,6 +119,7 @@ platform_pre_upgrade() {
 	local board=$(board_name)
 
 	case "$board" in
+	gaben,flexisbc|\
 	toradex,apalis_imx6q-eval|\
 	toradex,apalis_imx6q-ixora|\
 	toradex,apalis_imx6q-ixora-v1.1)
