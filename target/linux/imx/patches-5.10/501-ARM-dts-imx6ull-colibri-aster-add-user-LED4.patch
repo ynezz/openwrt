@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Mon, 7 Jun 2021 21:27:08 +0200
+Subject: [PATCH] ARM: dts: imx6ull-colibri-aster: add user LED4
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Add support for user LED4 of green color which ought to be available on
+all Aster carrier boards.
+
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ arch/arm/boot/dts/imx6ull-colibri-aster.dtsi | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/arch/arm/boot/dts/imx6ull-colibri-aster.dtsi b/arch/arm/boot/dts/imx6ull-colibri-aster.dtsi
+index 9ccbb330d528..7f785ada2a52 100644
+--- a/arch/arm/boot/dts/imx6ull-colibri-aster.dtsi
++++ b/arch/arm/boot/dts/imx6ull-colibri-aster.dtsi
+@@ -26,6 +26,15 @@
+ 		};
+ 	};
+ 
++	leds {
++		compatible = "gpio-leds";
++
++		led_led4_green: led4-green {
++			label = "green:led4";
++			gpios = <&gpio2 7 GPIO_ACTIVE_HIGH>;
++		};
++	};
++
+ 	extcon_usbc_det: usbc_det {
+ 		compatible = "linux,extcon-usb-gpio";
+ 		debounce = <25>;
