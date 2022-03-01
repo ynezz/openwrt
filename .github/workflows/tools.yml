@@ -114,12 +114,13 @@ jobs:
         run: |
           cd "$WORKPATH"
           pwd
+          printf 'CONFIG_DEVEL=y\nCONFIG_BUILD_LOG=y\n' > .config
           make defconfig
 
       - name: Build tools
         run: |
           cd "$WORKPATH"
-          make tools/install -j$(nproc) BUILD_LOG=1
+          make tools/compile -j$(nproc) || make tools/compile V=s -j1
 
       - name: Upload logs
         if: failure()
