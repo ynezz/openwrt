@@ -1,6 +1,7 @@
 name: Build host tools
 
 on:
+  push:
   pull_request:
     paths:
       - 'tools/**'
