@@ -106,7 +106,7 @@ jobs:
             wget \
             xsltproc \
             zlib1g-dev
-          echo "WORKPATH=$GITHUB_WORKSPACE/openwrt/" >> "$GITHUB_ENV"
+          echo "WORKPATH=$GITHUB_WORKSPACE/openwrt" >> "$GITHUB_ENV"
           cd "$WORKPATH"
           pwd
 
