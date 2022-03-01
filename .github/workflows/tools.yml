@@ -13,7 +13,6 @@ jobs:
       fail-fast: False
       matrix:
         os: 
-          - ubuntu-latest
           - macos-latest
     steps:
       - name: Checkout
