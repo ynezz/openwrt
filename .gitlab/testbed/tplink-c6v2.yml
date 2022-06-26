@@ -1,0 +1,10 @@
+.tplink-c6v2 testbed:
+  extends: .testbed true.cz
+  variables:
+    DUT_TARGET: ath79
+    DUT_SUBTARGET: generic
+    DUT_BOARD: tplink-c6v2
+    DUT_IMAGE_MATCH_PATTERN: .*archer-c6-v2.*initramfs.*.bin
+    DUT_TFTP_IMAGE_FILENAME: openwrt-ath79-generic-tplink_archer-c6-v2-initramfs-kernel.bin
+  tags:
+    - dut-tplink-c6v2

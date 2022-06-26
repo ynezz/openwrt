@@ -1,0 +1,21 @@
+.turris-omnia labgrid initramfs:
+  retry: 1
+  extends: .turris-omnia testbed initramfs
+  variables:
+    LABGRID_TARGET: "${DUT_BOARD}-$DUT_BOOT_MEDIUM"
+
+.turris-omnia testbed initramfs:
+  extends: .turris-omnia testbed
+  variables:
+    DUT_BOOT_MEDIUM: initramfs
+    DUT_IMAGE_MATCH_PATTERN: .*turris-omnia-initramfs.*.bin
+    DUT_TFTP_IMAGE_FILENAME: openwrt-mvebu-cortexa9-cznic_turris-omnia-initramfs-kernel.bin
+
+.turris-omnia testbed:
+  extends: .testbed true.cz
+  variables:
+    DUT_TARGET: mvebu
+    DUT_SUBTARGET: cortexa9
+    DUT_BOARD: turris-omnia
+  tags:
+    - dut-turris-omnia

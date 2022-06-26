@@ -1,12 +1,20 @@
 include:
   - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/main.yml
   - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/target.yml
+  - local: .gitlab/testbed.yml
+  - local: .gitlab/testbed/glinet-b1300.yml
+  - local: .gitlab/testbed/turris-omnia.yml
+
+stages:
+  - build
+  - run
 
 variables:
   CI_TARGET_BUILD_CONFIG_EXTRA: +BUILDBOT +DEVEL +KERNEL_KALLSYMS +BUILD_LOG +BPF_TOOLCHAIN_NONE +TESTING_KERNEL -IB -SDK -PACKAGE_kmod-acx-mac80211
 
 .truecz:
   extends: .openwrt-target-build
+  stage: build
   tags:
     - truecz-hetzner-autoscale
 
@@ -20,6 +28,12 @@ variables:
   rules:
     - when: always
 
+target build ipq40xx generic:
+  extends: .always
+
+runtime testing on Gl.iNet B1300 with initramfs image:
+  extends: .glinet-b1300 labgrid initramfs
+  needs: ["target build ipq40xx generic"]
 
 .target build x86 64:
   extends: .always

@@ -1,0 +1,16 @@
+include:
+  - remote: https://gitlab.com/ynezz/openwrt-ci/raw/master/openwrt-ci/gitlab/main.yml
+
+.check shell scripts with shellcheck:
+  stage: pre-build
+  extends: .openwrt-shellcheck
+
+check Python scripts with black and flake8:
+  stage: pre-build
+  extends: .openwrt-pythoncheck
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - .gitlab/scripts/*
+    - when: manual
+      allow_failure: true

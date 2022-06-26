@@ -1,0 +1,99 @@
+.testbed:
+  stage: run
+  image: "$CI_REGISTRY_IMAGE/testbed:latest"
+  variables:
+    DUT_SLEEP_AFTER_BOOT: 30
+    OWRT_DOWNLOADS_URL: https://downloads.openwrt.org
+    TESTBED_TFTP_PATH: /var/lib/tftpboot
+    TFTP_IMAGE_PATH: bin/targets/$DUT_TARGET/$DUT_SUBTARGET
+    TARGET_LAN_IP: 192.168.1.1
+    TARGET_LAN_TEST_HOST: 192.168.1.2
+    CRAM_REMOTE_COMMAND: ssh root@$TARGET_LAN_IP
+    CRAM_TEST_SUITE: |
+      .gitlab/tests/cram/generic/build/generic
+      .gitlab/tests/cram/generic/build/$OWRT_IMAGE_BUILD_RELEASE
+      .gitlab/tests/cram/generic/arch/$DUT_TARGET
+      .gitlab/tests/cram/generic/arch/${DUT_TARGET}_$DUT_SUBTARGET
+      .gitlab/tests/cram/generic/board/$DUT_BOARD
+      .gitlab/tests/cram/generic/board/${DUT_BOARD}_$OWRT_IMAGE_BUILD_RELEASE
+      .gitlab/tests/cram/$DUT_BOOT_MEDIUM/build/generic
+      .gitlab/tests/cram/$DUT_BOOT_MEDIUM/build/$OWRT_IMAGE_BUILD_RELEASE
+      .gitlab/tests/cram/$DUT_BOOT_MEDIUM/arch/$DUT_TARGET
+      .gitlab/tests/cram/$DUT_BOOT_MEDIUM/arch/${DUT_TARGET}_$DUT_SUBTARGET
+      .gitlab/tests/cram/$DUT_BOOT_MEDIUM/board/$DUT_BOARD
+      .gitlab/tests/cram/$DUT_BOOT_MEDIUM/board/${DUT_BOARD}_$OWRT_IMAGE_BUILD_RELEASE
+
+  before_script:
+    - eval $(ssh-agent -s)
+    - echo "$TESTBED_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh; chmod 700 ~/.ssh
+    - ssh-keyscan $TESTBED_UART_RELAY_HOST > ~/.ssh/known_hosts 2> /dev/null
+    - chmod 644 ~/.ssh/known_hosts
+
+    - >
+      if [ -n "$TFTP_IMAGE_DOWNLOAD_URL" ]; then
+        echo "Downloading firmware image from $TFTP_IMAGE_DOWNLOAD_URL"
+        curl --fail "$TFTP_IMAGE_DOWNLOAD_URL" > "$TESTBED_TFTP_PATH/$DUT_TFTP_IMAGE_FILENAME"
+      elif [ -n "$OWRT_IMAGE_BUILD_RELEASE" ]; then
+        url="$OWRT_DOWNLOADS_URL/$(echo $OWRT_IMAGE_BUILD_RELEASE | tr '_' '/')/targets/$DUT_TARGET/$DUT_SUBTARGET";
+        image=$(curl "$url/" | sed -nE "s/.*href\=\"($DUT_IMAGE_MATCH_PATTERN)\".*/\1/p");
+        echo "Downloading $url/$image to $TESTBED_TFTP_PATH/$DUT_TFTP_IMAGE_FILENAME";
+        curl --fail "$url/$image" > "$TESTBED_TFTP_PATH/$DUT_TFTP_IMAGE_FILENAME"
+      else
+        echo "Using firmware image $TESTBED_TFTP_PATH/$DUT_TFTP_IMAGE_FILENAME"
+        cp "$TFTP_IMAGE_PATH/$DUT_TFTP_IMAGE_FILENAME" "$TESTBED_TFTP_PATH/"
+      fi
+
+    - .gitlab/scripts/testbed-device.py --target $LABGRID_TARGET boot_into shell
+    - >
+      .gitlab/scripts/testbed-device.py
+      --target $LABGRID_TARGET check_network
+      --network lan
+      --remote-host $TARGET_LAN_TEST_HOST
+
+    - ssh-keyscan $TARGET_LAN_IP >> ~/.ssh/known_hosts 2> /dev/null
+    - ssh root@$TARGET_LAN_IP "ubus call system board" | tee system-$LABGRID_TARGET.json
+
+  script:
+    - set -o pipefail
+    - sleep $DUT_SLEEP_AFTER_BOOT
+    - python3 -m cram --verbose $CRAM_TEST_SUITE $CRAM_TEST_SUITE_EXTRA | tee cram-result-$LABGRID_TARGET.txt
+
+  after_script:
+    - eval $(ssh-agent -s)
+    - echo "$TESTBED_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh; chmod 700 ~/.ssh
+    - ssh-keyscan $TESTBED_UART_RELAY_HOST > ~/.ssh/known_hosts 2> /dev/null
+    - chmod 644 ~/.ssh/known_hosts
+
+    - ssh-keyscan $TARGET_LAN_IP >> ~/.ssh/known_hosts 2> /dev/null
+    - >
+      ssh root@$TARGET_LAN_IP exit && {
+        ssh root@$TARGET_LAN_IP ps > processes-$LABGRID_TARGET.txt
+        ssh root@$TARGET_LAN_IP dmesg > dmesg-$LABGRID_TARGET.txt
+        ssh root@$TARGET_LAN_IP logread > logread-$LABGRID_TARGET.txt
+        ssh root@$TARGET_LAN_IP cat /etc/config/network > uci-network-$LABGRID_TARGET.txt
+        ssh root@$TARGET_LAN_IP cat /etc/config/wireless > uci-wireless-$LABGRID_TARGET.txt
+      } || true
+
+    - .gitlab/scripts/testbed-device.py --target $LABGRID_TARGET power off
+
+    - mv console_$LABGRID_TARGET console_$LABGRID_TARGET.txt || true
+
+  artifacts:
+    expire_in: 1 month
+    when: always
+    paths:
+      - .gitlab/tests/cram/**/*.t.err
+      - processes-$LABGRID_TARGET.txt
+      - dmesg-$LABGRID_TARGET.txt
+      - logread-$LABGRID_TARGET.txt
+      - uci-*-$LABGRID_TARGET.txt
+      - system-$LABGRID_TARGET.json
+      - console_$LABGRID_TARGET.txt
+      - cram-result-$LABGRID_TARGET.txt
+
+.testbed true.cz:
+  extends: .testbed
+  variables:
+    TESTBED_UART_RELAY_HOST: uart-relay.testbed.vpn.true.cz

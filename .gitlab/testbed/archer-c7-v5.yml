@@ -1,0 +1,21 @@
+.archer-c7-v5 labgrid initramfs:
+  extends: .archer-c7-v5 testbed initramfs
+  variables:
+    DUT_SLEEP_AFTER_BOOT: 90
+    LABGRID_TARGET: "${DUT_BOARD}-$DUT_BOOT_MEDIUM"
+
+.archer-c7-v5 testbed initramfs:
+  extends: .archer-c7-v5 testbed
+  variables:
+    DUT_BOOT_MEDIUM: initramfs
+    DUT_IMAGE_MATCH_PATTERN: .*tplink_archer-c7-v5.*initramfs.*bin
+    DUT_TFTP_IMAGE_FILENAME: openwrt-ath79-generic-tplink_archer-c7-v5-initramfs-kernel.bin
+
+.archer-c7-v5 testbed:
+  extends: .testbed true.cz
+  variables:
+    DUT_TARGET: ath79
+    DUT_SUBTARGET: generic
+    DUT_BOARD: archer-c7-v5
+  tags:
+    - dut-archer-c7-v5

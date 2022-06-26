@@ -1,0 +1,20 @@
+.glinet-b1300 labgrid initramfs:
+  extends: .glinet-b1300 testbed initramfs
+  variables:
+    LABGRID_TARGET: "${DUT_BOARD}-$DUT_BOOT_MEDIUM"
+
+.glinet-b1300 testbed initramfs:
+  extends: .glinet-b1300 testbed
+  variables:
+    DUT_BOOT_MEDIUM: initramfs
+    DUT_IMAGE_MATCH_PATTERN: .*glinet_gl-b1300.*initramfs.*itb
+    DUT_TFTP_IMAGE_FILENAME: openwrt-ipq40xx-generic-glinet_gl-b1300-initramfs-fit-uImage.itb
+
+.glinet-b1300 testbed:
+  extends: .testbed true.cz
+  variables:
+    DUT_TARGET: ipq40xx
+    DUT_SUBTARGET: generic
+    DUT_BOARD: glinet-b1300
+  tags:
+    - dut-glinet-b1300
