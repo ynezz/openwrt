@@ -1,4 +1,4 @@
-name: Build Kernel
+name: Build Testing Kernel
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
       - 'package/kernel/**'
       - 'target/linux/generic/**'
 jobs:
-  build_kernel:
+  build_testing_kernel:
     uses: ./.github/workflows/kernel-reusable.yml
     with:
-      config_seed: 'CONFIG_ALL_KMODS=y\n'
+      config_seed: 'CONFIG_ALL_KMODS=y\nCONFIG_TESTING_KERNEL=y\n'
