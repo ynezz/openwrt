@@ -21,10 +21,7 @@ jobs:
       - name: Set targets
         id: find_targets
         run: |
-          export TARGETS="$(perl ./scripts/dump-target-info.pl targets 2>/dev/null \
-            | sort -u -t '/' -k1,1 \
-            | awk '{ print $1 }' \
-            | sed 's/mt7620/mt7621/')"
+          export TARGETS="bcm53xx/generic"
 
           JSON='['
           FIRST=1
