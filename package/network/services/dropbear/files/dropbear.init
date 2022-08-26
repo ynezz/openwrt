@@ -129,7 +129,8 @@ validate_section_dropbear()
 		'IdleTimeout:uinteger:0' \
 		'MaxAuthTries:uinteger:3' \
 		'RecvWindowSize:uinteger:0' \
-		'mdns:bool:1'
+		'mdns:bool:1' \
+		'DisableIPToS:bool:0'
 }
 
 dropbear_instance()
@@ -160,6 +161,7 @@ dropbear_instance()
 	[ "${GatewayPorts}" -eq 1 ] && procd_append_param command -a
 	[ "${RootPasswordAuth}" -eq 0 ] && procd_append_param command -g
 	[ "${RootLogin}" -eq 0 ] && procd_append_param command -w
+	[ "${DisableIPToS}" -eq 1 ] && procd_append_param command -z
 	if [ -n "${rsakeyfile}" ]; then
 		logger -t ${NAME} -p daemon.warn \
 			"option 'rsakeyfile' is considered to be deprecated and" \
