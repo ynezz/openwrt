@@ -1,6 +1,7 @@
 name: Build Kernel
 
 on:
+  push:
   pull_request:
     paths:
       - '.github/workflows/kernel.yml'
@@ -22,7 +23,7 @@ jobs:
         id: find_targets
         run: |
           export TARGETS="$(perl ./scripts/dump-target-info.pl targets 2>/dev/null \
-            | sort -u -t '/' -k1,1 \
+            | sort -u -t '/' -k1,1 | grep bcm27xx \
             | awk '{ print $1 }')"
 
           JSON='['
