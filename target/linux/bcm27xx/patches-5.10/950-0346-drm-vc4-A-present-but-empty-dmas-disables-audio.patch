@@ -16,18 +16,13 @@ Signed-off-by: Phil Elwell <phil@raspberrypi.org>
 
 --- a/drivers/gpu/drm/vc4/vc4_hdmi.c
 +++ b/drivers/gpu/drm/vc4/vc4_hdmi.c
-@@ -1333,10 +1333,12 @@ static int vc4_hdmi_audio_init(struct vc
- 	const __be32 *addr;
- 	int index;
+@@ -1338,7 +1338,8 @@ static int vc4_hdmi_audio_init(struct vc
+ 	int index, len;
  	int ret;
-+	int len;
  
--	if (!of_find_property(dev->of_node, "dmas", NULL)) {
+-	if (!of_find_property(dev->of_node, "dmas", &len) || !len) {
 +	if (!of_find_property(dev->of_node, "dmas", &len) ||
 +	    len == 0) {
  		dev_warn(dev,
--			 "'dmas' DT property is missing, no HDMI audio\n");
-+			 "'dmas' DT property is missing or empty, no HDMI audio\n");
+ 			 "'dmas' DT property is missing or empty, no HDMI audio\n");
  		return 0;
- 	}
- 

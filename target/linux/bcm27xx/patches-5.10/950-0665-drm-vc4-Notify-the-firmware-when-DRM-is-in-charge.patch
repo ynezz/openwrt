@@ -26,7 +26,7 @@ Signed-off-by: Maxime Ripard <maxime@cerno.tech>
  #include "uapi/drm/vc4_drm.h"
  
  #include "vc4_drv.h"
-@@ -305,8 +307,25 @@ static int vc4_drm_bind(struct device *d
+@@ -324,8 +326,25 @@ static int vc4_drm_bind(struct device *d
  	if (ret)
  		return ret;
  

@@ -10,7 +10,7 @@ Signed-off-by: Dom Cobley <popcornmix@gmail.com>
 
 --- a/drivers/gpu/drm/vc4/vc4_drv.c
 +++ b/drivers/gpu/drm/vc4/vc4_drv.c
-@@ -321,7 +321,7 @@ static int vc4_drm_bind(struct device *d
+@@ -340,7 +340,7 @@ static int vc4_drm_bind(struct device *d
  
  	node = of_parse_phandle(dev->of_node, "raspberrypi,firmware", 0);
  	if (node) {

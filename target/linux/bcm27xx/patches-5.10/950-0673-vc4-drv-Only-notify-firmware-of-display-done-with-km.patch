@@ -13,7 +13,7 @@ Signed-off-by: Dom Cobley <popcornmix@gmail.com>
 
 --- a/drivers/gpu/drm/vc4/vc4_drv.c
 +++ b/drivers/gpu/drm/vc4/vc4_drv.c
-@@ -258,6 +258,18 @@ const struct of_device_id vc4_dma_range_
+@@ -267,6 +267,18 @@ const struct of_device_id vc4_dma_range_
  	{}
  };
  
@@ -32,7 +32,7 @@ Signed-off-by: Dom Cobley <popcornmix@gmail.com>
  static int vc4_drm_bind(struct device *dev)
  {
  	struct platform_device *pdev = to_platform_device(dev);
-@@ -318,7 +330,7 @@ static int vc4_drm_bind(struct device *d
+@@ -337,7 +349,7 @@ static int vc4_drm_bind(struct device *d
  
  	drm_fb_helper_remove_conflicting_framebuffers(NULL, "vc4drmfb", false);
  

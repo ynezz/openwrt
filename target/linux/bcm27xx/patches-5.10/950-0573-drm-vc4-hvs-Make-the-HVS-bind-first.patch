@@ -16,7 +16,7 @@ Signed-off-by: Maxime Ripard <maxime@cerno.tech>
 
 --- a/drivers/gpu/drm/vc4/vc4_drv.c
 +++ b/drivers/gpu/drm/vc4/vc4_drv.c
-@@ -354,12 +354,21 @@ static const struct component_master_ops
+@@ -373,12 +373,21 @@ static const struct component_master_ops
  	.unbind = vc4_drm_unbind,
  };
  
