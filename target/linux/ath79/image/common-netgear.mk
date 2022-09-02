@@ -1,5 +1,7 @@
+include $(INCLUDE_DIR)/image-commands.mk
+
 define Build/netgear-rootfs
-	mkimage \
+	$(MKIMAGE) \
 		-A mips -O linux -T filesystem -C none \
 		$(if $(UIMAGE_MAGIC),-M $(UIMAGE_MAGIC)) \
 		-n '$(VERSION_DIST) filesystem' \
@@ -18,7 +20,7 @@ define Build/netgear-squashfs
 		$(if $(SOURCE_DATE_EPOCH),-fixed-time $(SOURCE_DATE_EPOCH))
 
 	dd if=/dev/zero bs=1k count=1 >> $@.squashfs
-	mkimage \
+	$(MKIMAGE) \
 		-A mips -O linux -T filesystem -C none \
 		$(if $(UIMAGE_MAGIC),-M $(UIMAGE_MAGIC)) \
 		-a 0xbf070000 -e 0xbf070000 \

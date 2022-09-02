@@ -14,6 +14,7 @@ PKG_HASH:=fe732aaf037d9cc3c0909bad8362af366ae964bbdac6913a34081ff4ad565372
 
 include $(INCLUDE_DIR)/u-boot.mk
 include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/image-commands.mk
 
 define U-Boot/Default
   BUILD_TARGET:=kirkwood
@@ -128,7 +129,7 @@ define Build/Compile
 	+$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) \
 		u-boot.kwb \
 		CROSS_COMPILE=$(TARGET_CROSS)
-	mkimage -A $(ARCH) -O linux -T kernel -C none \
+	$(MKIMAGE) -A $(ARCH) -O linux -T kernel -C none \
 		-a 0x600000 -e 0x600000 \
 		-n 'U-Boot uImage' \
 		-d $(PKG_BUILD_DIR)/u-boot.bin $(PKG_BUILD_DIR)/u-boot.img

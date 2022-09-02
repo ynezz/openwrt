@@ -17,8 +17,8 @@ define Build/bootfs
 	cat $@ | $(STAGING_DIR_HOST)/bin/lzma e -eos -si -so > $@.tmp
 	mv $@.tmp $@
 	sed -i "s=\$${kernel}=$@=" $(KDIR)/bootfs*.its*
-	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) mkimage -f $(KDIR)/bootfs-bcm4908.its $(KDIR)/bootfs-bcm4908.itb
-	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) mkimage -f $(KDIR)/bootfs-bcm4912.its $(KDIR)/bootfs-bcm4912.itb
+	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) $(MKIMAGE) -f $(KDIR)/bootfs-bcm4908.its $(KDIR)/bootfs-bcm4908.itb
+	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) $(MKIMAGE) -f $(KDIR)/bootfs-bcm4912.its $(KDIR)/bootfs-bcm4912.itb
 endef
 
 define Build/bcm4908asus
@@ -58,7 +58,7 @@ define Build/pkgtb
 	cp pkgtb-$(SOC).its $@.its
 	sed -i "s=\$${bootfs}=$(KDIR)/bootfs-$(SOC).itb=" $@.its
 	sed -i "s=\$${rootfs}=$@.rootfs=" $@.its
-	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) mkimage -f $@.its $@
+	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) $(MKIMAGE) -f $@.its $@
 endef
 
 define Device/Default

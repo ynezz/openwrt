@@ -1,3 +1,5 @@
+include $(INCLUDE_DIR)/image-commands.mk
+
 define Build/imx-combined-image-prepare
 	rm -rf $@.boot
 	mkdir -p $@.boot
@@ -16,7 +18,7 @@ define Build/imx-combined-image
 			$@.boot/;
 	)
 
-	mkimage -A arm -O linux -T script -C none -a 0 -e 0 \
+	$(MKIMAGE) -A arm -O linux -T script -C none -a 0 -e 0 \
 		-n '$(DEVICE_ID) OpenWrt bootscript' \
 		-d bootscript-$(DEVICE_NAME) \
 		$@.boot/boot.scr

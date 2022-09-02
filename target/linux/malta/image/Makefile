@@ -14,7 +14,7 @@ define CompressGzip
 endef
 
 define MkuImage
-	mkimage -A mips -O linux -T kernel -a 0x80100000 -C $(1) $(2) \
+	$(MKIMAGE) -A mips -O linux -T kernel -a 0x80100000 -C $(1) $(2) \
 		-e 0x80100000 -n 'MIPS OpenWrt Linux-$(LINUX_VERSION)' \
 		-d $(3) $(4)
 endef

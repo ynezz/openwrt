@@ -35,13 +35,13 @@ define Build/mkbrnimg
 endef
 
 define Build/fullimage
-	mkimage -A mips -O linux -C lzma -T filesystem -a 0x00  \
+	$(MKIMAGE) -A mips -O linux -C lzma -T filesystem -a 0x00  \
 		-e 0x00 -n '$(VERSION_DIST) RootFS' \
 		-d $(IMAGE_ROOTFS) $(IMAGE_ROOTFS).new
 
 	cat $(IMAGE_KERNEL) $(IMAGE_ROOTFS).new > $@.tmp
 
-	mkimage -A mips -O linux -T multi -a 0x00 -C none \
+	$(MKIMAGE) -A mips -O linux -T multi -a 0x00 -C none \
 		-e 0x00 -n 'OpenWrt fullimage' \
 		-d $@.tmp $@
 

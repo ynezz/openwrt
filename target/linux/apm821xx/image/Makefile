@@ -23,7 +23,7 @@ define Build/boot-img
 endef
 
 define Build/boot-script
-	$(STAGING_DIR_HOST)/bin/mkimage -A powerpc -T script -C none -n "$(PROFILE) Boot Script" \
+	$(MKIMAGE) -A powerpc -T script -C none -n "$(PROFILE) Boot Script" \
 		-d mbl_boot.scr \
 		$@.scr
 endef
@@ -58,7 +58,7 @@ define Build/MuImage-initramfs
 	# part of the legacy multi image. Since we need to put the
 	# device tree stuff into part 3.
 
-	-$(STAGING_DIR_HOST)/bin/mkimage -A $(LINUX_KARCH) -O linux -T multi \
+	-$(MKIMAGE) -A $(LINUX_KARCH) -O linux -T multi \
 		-C $(1) -a $(KERNEL_LOADADDR) -e $(KERNEL_ENTRY) \
 		-n '$(BOARD_NAME) initramfs' -d $@:$@.fakerd:$@.dtb $@.new
 	mv $@.new $@

@@ -1,3 +1,5 @@
+include $(INCLUDE_DIR)/image-commands.mk
+
 UBIFS_OPTS := -m 2048 -e 126KiB -c 4096
 KERNEL_LOADADDR := 0x60008000
 
@@ -23,7 +25,7 @@ define Build/omninas-factory
 	$(CP) $@ $@.tmp/uImage
 	dd if=/dev/zero bs=64k count=4 of=$@.dummy
 	gzip $@.dummy
-	mkimage -A arm -T ramdisk -C gzip -n "dummy" \
+	$(MKIMAGE) -A arm -T ramdisk -C gzip -n "dummy" \
 		-d $@.dummy.gz \
 		$@.tmp/rdimg.gz
 	echo 2.35.20140102 > $@.tmp/version ; echo >> $@.tmp/version

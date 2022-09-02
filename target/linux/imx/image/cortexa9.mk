@@ -17,7 +17,7 @@ define Build/boot-overlay
 			$(IMG_PREFIX)-$(dts).dtb \
 			$@.boot/$(dts).dtb; \
 	)
-	mkimage -A arm -O linux -T script -C none -a 0 -e 0 \
+	$(MKIMAGE) -A arm -O linux -T script -C none -a 0 -e 0 \
 		-n '$(DEVICE_ID) OpenWrt bootscript' \
 		-d ./bootscript-$(DEVICE_NAME) \
 		$@.boot/6x_bootscript-$(DEVICE_NAME)
@@ -41,7 +41,7 @@ define Build/bootfs.tar.gz
 endef
 
 define Build/recovery-scr
-	mkimage -A arm -O linux -T script -C none -a 0 -e 0 \
+	$(MKIMAGE) -A arm -O linux -T script -C none -a 0 -e 0 \
 	-n '$(DEVICE_ID) OpenWrt recovery bootscript' \
 	-d ./recovery-$(DEVICE_NAME) $@
 endef

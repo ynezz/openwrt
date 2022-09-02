@@ -1,6 +1,8 @@
+include $(INCLUDE_DIR)/image-commands.mk
+
 define Build/create-uImage-dtb
 	# flat_dt target expect FIT image - which WNDR4700's uboot doesn't support
-	-$(STAGING_DIR_HOST)/bin/mkimage -A $(LINUX_KARCH) \
+	-$(MKIMAGE) -A $(LINUX_KARCH) \
 		-O linux -T kernel -C none \
 		-n '$(call toupper,$(LINUX_KARCH)) $(VERSION_DIST) Linux-$(LINUX_VERSION)' \
 		-d "$@.dtb" "$@.dtb.uimage"

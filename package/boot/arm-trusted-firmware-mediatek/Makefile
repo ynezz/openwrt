@@ -22,6 +22,7 @@ PKG_MAINTAINER:=Daniel Golle <daniel@makrotopia.org>
 include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/trusted-firmware-a.mk
 include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/image-commands.mk
 
 define Trusted-Firmware-A/Default
   BUILD_TARGET:=mediatek
@@ -195,7 +196,7 @@ TFA_TARGETS:= \
 
 TFA_MAKE_FLAGS += \
 	BOOT_DEVICE=$(BOOT_DEVICE) \
-	USE_MKIMAGE=1 MKIMAGE=$(STAGING_DIR_HOST)/bin/mkimage \
+	USE_MKIMAGE=1 MKIMAGE=$(MKIMAGE) \
 	$(if $(findstring ddr4,$(DDR_TYPE)),DRAM_USE_DDR4=1) \
 	$(if $(NAND_TYPE),NAND_TYPE=$(NAND_TYPE)) \
 	HAVE_DRAM_OBJ_FILE=yes \

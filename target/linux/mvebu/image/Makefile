@@ -17,7 +17,7 @@ define Build/boot-scr
 		-e 's#@ROOT@#$(IMG_PART_SIGNATURE)#g' \
 		-e 's#@DTB@#$(firstword $(DEVICE_DTS))#g' \
 		$(BOOT_SCRIPT).bootscript > $@-new.bootscript
-	mkimage -A arm -O linux -T script -C none -a 0 -e 0 -d $@-new.bootscript $@-boot.scr
+	$(MKIMAGE) -A arm -O linux -T script -C none -a 0 -e 0 -d $@-new.bootscript $@-boot.scr
 endef
 
 define Build/boot-img
@@ -43,7 +43,7 @@ define Build/buffalo-kernel-jffs2
 	rm -rf $(KDIR)/kernel_jffs2 $@.fakerd
 	mkdir -p $(KDIR)/kernel_jffs2
 	dd if=/dev/zero of=$@.fakerd bs=131008 count=1 conv=sync
-	$(STAGING_DIR_HOST)/bin/mkimage \
+	$(MKIMAGE) \
 		-T ramdisk -A $(LINUX_KARCH) -O linux -C gzip -n 'fake initrd' \
 		-d $@.fakerd $(KDIR)/kernel_jffs2/initrd.buffalo
 	cp $@ $(KDIR)/kernel_jffs2/uImage.buffalo

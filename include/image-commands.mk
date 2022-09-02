@@ -3,6 +3,8 @@
 IMAGE_KERNEL = $(word 1,$^)
 IMAGE_ROOTFS = $(word 2,$^)
 
+MKIMAGE = $(STAGING_DIR_HOST)/bin/mkimage
+
 define ModelNameLimit16
 $(shell expr substr "$(word 2, $(subst _, ,$(1)))" 1 16)
 endef
@@ -162,7 +164,7 @@ define Build/append-uImage-fakehdr
 	$(eval type=$(word 1,$(1)))
 	$(eval magic=$(word 2,$(1)))
 	touch $@.fakehdr
-	$(STAGING_DIR_HOST)/bin/mkimage \
+	$(MKIMAGE) \
 		-A $(LINUX_KARCH) -O linux -T $(type) -C none \
 		-n '$(VERSION_DIST) fake $(type)' \
 		$(if $(magic),-M $(magic)) \
@@ -294,7 +296,7 @@ define Build/fit
 		$(if $(DEVICE_DTS_OVERLAY),$(foreach dtso,$(DEVICE_DTS_OVERLAY), -O $(dtso):$(KERNEL_BUILD_DIR)/image-$(dtso).dtb)) \
 		-c $(if $(DEVICE_DTS_CONFIG),$(DEVICE_DTS_CONFIG),"config-1") \
 		-A $(LINUX_KARCH) -v $(LINUX_VERSION)
-	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) mkimage $(if $(findstring external,$(word 3,$(1))),\
+	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) $(MKIMAGE) $(if $(findstring external,$(word 3,$(1))),\
 		-E -B 0x1000 $(if $(findstring static,$(word 3,$(1))),-p 0x1000)) -f $@.its $@.new
 	@mv $@.new $@
 endef
@@ -455,14 +457,14 @@ endef
 define Build/qsdk-ipq-factory-nand
 	$(TOPDIR)/scripts/mkits-qsdk-ipq-image.sh \
 		$@.its ubi $@
-	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) mkimage -f $@.its $@.new
+	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) $(MKIMAGE) -f $@.its $@.new
 	@mv $@.new $@
 endef
 
 define Build/qsdk-ipq-factory-nor
 	$(TOPDIR)/scripts/mkits-qsdk-ipq-image.sh \
 		$@.its hlos $(IMAGE_KERNEL) rootfs $(IMAGE_ROOTFS)
-	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) mkimage -f $@.its $@.new
+	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) $(MKIMAGE) -f $@.its $@.new
 	@mv $@.new $@
 endef
 
@@ -551,7 +553,7 @@ define Build/tplink-v2-image
 endef
 
 define Build/uImage
-	mkimage \
+	$(MKIMAGE) \
 		-A $(LINUX_KARCH) \
 		-O linux \
 		-T kernel \

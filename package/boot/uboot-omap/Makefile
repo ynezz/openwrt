@@ -15,6 +15,7 @@ PKG_HASH:=312b7eeae44581d1362c3a3f02c28d806647756c82ba8c72241c7cdbe68ba77e
 
 include $(INCLUDE_DIR)/u-boot.mk
 include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/image-commands.mk
 
 define U-Boot/Default
   BUILD_TARGET:=omap
@@ -46,7 +47,7 @@ define Build/InstallDev
 		$(CP) $(patsubst %,$(PKG_BUILD_DIR)/%,$(UBOOT_IMAGE)) $(STAGING_DIR_IMAGE)/$(device)/
 	)
 	$(foreach device,$(BUILD_DEVICES), \
-		mkimage -C none -A arm -T script -d ./files/boot.scr.txt \
+		$(MKIMAGE) -C none -A arm -T script -d ./files/boot.scr.txt \
 			$(STAGING_DIR_IMAGE)/$(device)/boot.scr
 	)
 endef

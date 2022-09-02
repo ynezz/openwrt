@@ -133,7 +133,7 @@ define Image/BuildKernel/Initramfs
 endef
 
 define Image/BuildKernel/MkuImage
-	mkimage -A $(ARCH) -O linux -T kernel -C $(1) -a $(2) -e $(3) \
+	$(MKIMAGE) -A $(ARCH) -O linux -T kernel -C $(1) -a $(2) -e $(3) \
 		-n '$(call toupper,$(ARCH)) $(VERSION_DIST) Linux-$(LINUX_VERSION)' -d $(4) $(5)
 endef
 

@@ -12,7 +12,7 @@ define Build/tegra-sdcard
 	$(if $(DEVICE_DTS),\
 		$(foreach dtb,$(DEVICE_DTS),$(CP) $(DTS_DIR)/$(dtb).dtb $@.boot), \
 		$(CP) $(DTS_DIR)/*.dtb $@.boot)
-	mkimage -A arm -O linux -T script -C none -a 0 -e 0 \
+	$(MKIMAGE) -A arm -O linux -T script -C none -a 0 -e 0 \
 		-n '$(DEVICE_TITLE) OpenWrt bootscript' \
 		-d $(BOOT_SCRIPT) \
 		$@.boot/boot.scr

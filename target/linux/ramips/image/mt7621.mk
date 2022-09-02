@@ -4,6 +4,7 @@
 
 include ./common-sercomm.mk
 include ./common-tp-link.mk
+include $(INCLUDE_DIR)/image-commands.mk
 
 DEFAULT_SOC := mt7621
 
@@ -104,7 +105,7 @@ endef
 define Build/zyxel-nwa-fit
 	$(TOPDIR)/scripts/mkits-zyxel-fit.sh \
 		$@.its $@ "6b e1 6f e1 ff ff ff ff ff ff"
-	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) mkimage -f $@.its $@.new
+	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) $(MKIMAGE) -f $@.its $@.new
 	@mv $@.new $@
 endef
 
