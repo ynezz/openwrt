@@ -97,12 +97,15 @@ jobs:
         shell: su buildbot -c "sh -e {0}"
         working-directory: openwrt
         run: |
-          echo CONFIG_ALL_KMODS=y >> .config
-
           ./scripts/ext-toolchain.sh \
             --toolchain ${{ env.TOOLCHAIN_FILE }}/toolchain-* \
             --overwrite-config \
             --config ${{ env.TARGET }}/${{ env.SUBTARGET }}
+
+          echo CONFIG_ALL_KMODS=y >> .config
+          echo CONFIG_TARGET_MULTI_PROFILE=y >> .config
+          echo CONFIG_TARGET_ALL_PROFILES=y >> .config
+          # echo CONFIG_TARGET_PER_DEVICE_ROOTFS=y >> .config
 
           make defconfig
 
@@ -111,25 +114,10 @@ jobs:
         working-directory: openwrt
         run: ./scripts/diffconfig.sh
 
-      - name: Build tools
+      - name: Build all
         shell: su buildbot -c "sh -e {0}"
         working-directory: openwrt
-        run: make tools/install -j$(nproc) BUILD_LOG=1
-
-      - name: Build toolchain
-        shell: su buildbot -c "sh -e {0}"
-        working-directory: openwrt
-        run: make toolchain/install -j$(nproc) BUILD_LOG=1
-
-      - name: Build Kernel
-        shell: su buildbot -c "sh -e {0}"
-        working-directory: openwrt
-        run: make target/compile -j$(nproc) BUILD_LOG=1
-
-      - name: Build Kernel Kmods
-        shell: su buildbot -c "sh -e {0}"
-        working-directory: openwrt
-        run: make package/linux/compile -j$(nproc) BUILD_LOG=1
+        run: make -j$(nproc) BUILD_LOG=1
 
       - name: Upload logs
         if: failure()
