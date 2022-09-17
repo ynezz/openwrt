@@ -640,6 +640,7 @@ define Device/linksys_ea6350v3
 	UBINIZE_OPTS := -E 5
 	IMAGES += factory.bin
 	IMAGE/factory.bin := append-kernel | append-uImage-fakehdr filesystem | pad-to $$$$(KERNEL_SIZE) | append-ubi | linksys-image type=EA6350v3
+	BROKEN := y
 endef
 TARGET_DEVICES += linksys_ea6350v3
 
