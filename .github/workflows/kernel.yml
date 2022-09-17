@@ -131,6 +131,11 @@ jobs:
         working-directory: openwrt
         run: make package/linux/compile -j$(nproc) BUILD_LOG=1
 
+      - name: Build Target
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: make target/install -j$(nproc) BUILD_LOG=1 V=s
+
       - name: Upload logs
         if: failure()
         uses: actions/upload-artifact@v2
