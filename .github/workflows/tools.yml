@@ -70,7 +70,7 @@ jobs:
 
       - name: Build tools MacOS
         working-directory: ${{ env.WORKPATH }}/openwrt
-        run: make tools/install -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
+        run: make -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
 
       - name: Upload logs
         if: always()
