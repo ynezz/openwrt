@@ -1,0 +1,33 @@
+name: Testing mediatek/mt7622
+
+on:
+  push:
+
+jobs:
+  s3_bucket_name:
+    runs-on: ubuntu-latest
+    name: Determine s3 bucket dirname
+    outputs:
+      s3_dirname: ${{ steps.s3_dirname.outputs.s3_dirname }}
+    steps:
+      - name: Set s3 bucket dirname
+        id: s3_dirname
+        run: |
+          S3_DIRNAME=$(echo ${GITHUB_REF_NAME}-${GITHUB_SHA:0:10} | tr '/' '_')
+          echo "s3_dirname=$S3_DIRNAME" >> $GITHUB_OUTPUT
+
+  build:
+    name: Build Packages with external toolchain
+    needs: s3_bucket_name
+    uses: ./.github/workflows/build.yml
+    secrets:
+      s3_url: ${{ secrets.MINIO_URL }}
+      s3_access_key: ${{ secrets.MINIO_ACCESS_KEY }}
+      s3_secret_key: ${{ secrets.MINIO_SECRET_KEY }}
+    with:
+      target: mediatek/mt7622
+      include_feeds: false
+      build_all_boards: true
+      build_kernel: true
+      build_full: true
+      s3_remote_path: dump/github/${{ needs.s3_bucket_name.outputs.s3_dirname }}
