@@ -22,6 +22,15 @@ on:
         type: boolean
       build_all_boards:
         type: boolean
+      s3_remote_path:
+        type: string
+      s3_local_path:
+        default: '/github/workspace/openwrt/bin'
+        type: string
+    secrets:
+      s3_url:
+      s3_access_key:
+      s3_secret_key:
 
 permissions:
   contents: read
@@ -363,3 +372,16 @@ jobs:
         with:
           name: ${{ env.TARGET }}-${{ env.SUBTARGET }}-logs
           path: "openwrt/logs"
+
+      - name: Determine s3 bucket dirname
+        run: echo "S3_DIRNAME=$(echo ${GITHUB_REF_NAME}-${GITHUB_SHA:0:10} | tr '/' '_')" >> $GITHUB_ENV
+
+      - name: Upload artifacts to s3 bucket
+        if: inputs.s3_remote_path != ''
+        uses: cloudkernels/minio-upload@v3
+        with:
+          url: ${{ secrets.s3_url }}
+          access-key: ${{ secrets.s3_access_key }}
+          secret-key: ${{ secrets.s3_secret_key }}
+          local-path: ${{ inputs.s3_local_path }}
+          remote-path: ${{ inputs.s3_remote_path }}
