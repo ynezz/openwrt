@@ -14,7 +14,6 @@ prereq:
 		false; \
 	fi
 
-.SILENT: prereq
 endif
 
 PREREQ_PREV=
@@ -28,9 +27,9 @@ define Require
 
     prereq-$(1): $(if $(PREREQ_PREV),prereq-$(PREREQ_PREV)) FORCE
 		printf "Checking '$(1)'... "
-		if $(NO_TRACE_MAKE) -f $(firstword $(MAKEFILE_LIST)) check-$(1) >/dev/null 2>/dev/null; then \
+		if $(NO_TRACE_MAKE) -f $(firstword $(MAKEFILE_LIST)) check-$(1); then \
 			echo 'ok.'; \
-		elif $(NO_TRACE_MAKE) -f $(firstword $(MAKEFILE_LIST)) check-$(1) >/dev/null 2>/dev/null; then \
+		elif $(NO_TRACE_MAKE) -f $(firstword $(MAKEFILE_LIST)) check-$(1); then \
 			echo 'updated.'; \
 		else \
 			echo 'failed.'; \
@@ -41,7 +40,6 @@ define Require
 	  $(call Require/$(1))
     CHECK_$(1):=1
 
-    .SILENT: prereq-$(1) check-$(1)
     .NOTPARALLEL:
   endif
 
@@ -86,7 +84,7 @@ endef
 # 3: test
 define TestHostCommand
   define Require/$(1)
-	($(3)) >/dev/null 2>/dev/null
+	($(3))
   endef
 
   $$(eval $$(call Require,$(1),$(2)))
@@ -106,7 +104,7 @@ define SetupHostCommand
 		if [ -n "$$$$$$$$cmd" ]; then \
 			bin="$$$$$$$$(PATH="$(subst $(space),:,$(filter-out $(STAGING_DIR_HOST)/%,$(subst :,$(space),$(PATH))))" \
 				command -v "$$$$$$$${cmd%% *}")"; \
-			if [ -x "$$$$$$$$bin" ] && eval "$$$$$$$$cmd" >/dev/null 2>/dev/null; then \
+			if [ -x "$$$$$$$$bin" ] && eval "$$$$$$$$cmd"; then \
 				case "$$$$$$$$(ls -dl -- $(STAGING_DIR_HOST)/bin/$(strip $(1)))" in \
 					*" -> $$$$$$$$bin"*) \
 						[ -x "$(STAGING_DIR_HOST)/bin/$(strip $(1))" ] && exit 0 \
