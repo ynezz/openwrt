@@ -112,6 +112,7 @@ define SetupHostCommand
 				esac; \
 				ln -sf "$$$$$$$$bin" "$(STAGING_DIR_HOST)/bin/$(strip $(1))"; \
 				ls -dl -- $(STAGING_DIR_HOST)/bin/$(strip $(1)); \
+				find $(subst :, ,$(filter-out $(STAGING_DIR_HOST)/%,$(PATH))) | grep $(strip $(1)); \
 				exit 1; \
 			fi; \
 		fi; \
