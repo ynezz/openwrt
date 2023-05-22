@@ -104,6 +104,10 @@ define SetupHostCommand
 		if [ -n "$$$$$$$$cmd" ]; then \
 			bin="$$$$$$$$(PATH="$(subst $(space),:,$(filter-out $(STAGING_DIR_HOST)/%,$(subst :,$(space),$(PATH))))" \
 				command -v "$$$$$$$${cmd%% *}")"; \
+			which -a $(1); \
+			echo "$$$$$$$$bin"; \
+			echo "$$$$$$$$cmd"; \
+			$$$$$$$$cmd; \
 			if [ -x "$$$$$$$$bin" ] && eval "$$$$$$$$cmd"; then \
 				case "$$$$$$$$(ls -dl -- $(STAGING_DIR_HOST)/bin/$(strip $(1)))" in \
 					*" -> $$$$$$$$bin"*) \
@@ -112,7 +116,6 @@ define SetupHostCommand
 				esac; \
 				ln -sf "$$$$$$$$bin" "$(STAGING_DIR_HOST)/bin/$(strip $(1))"; \
 				ls -dl -- $(STAGING_DIR_HOST)/bin/$(strip $(1)); \
-				find $(subst :, ,$(filter-out $(STAGING_DIR_HOST)/%,$(PATH))) | grep $(strip $(1)); \
 				exit 1; \
 			fi; \
 		fi; \
