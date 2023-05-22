@@ -104,9 +104,14 @@ define SetupHostCommand
 		if [ -n "$$$$$$$$cmd" ]; then \
 			bin="$$$$$$$$(PATH="$(subst $(space),:,$(filter-out $(STAGING_DIR_HOST)/%,$(subst :,$(space),$(PATH))))" \
 				command -v "$$$$$$$${cmd%% *}")"; \
+			echo begin which; \
 			which -a $(1); \
+			echo end which; \
+			echo show bin; \
 			echo "$$$$$$$$bin"; \
+			echo show cmd; \
 			echo "$$$$$$$$cmd"; \
+			echo do cmd; \
 			$$$$$$$$cmd; \
 			if [ -x "$$$$$$$$bin" ] && eval "$$$$$$$$cmd"; then \
 				case "$$$$$$$$(ls -dl -- $(STAGING_DIR_HOST)/bin/$(strip $(1)))" in \
