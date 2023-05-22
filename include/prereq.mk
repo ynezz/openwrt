@@ -104,11 +104,18 @@ define SetupHostCommand
 		if [ -n "$$$$$$$$cmd" ]; then \
 			bin="$$$$$$$$(PATH="$(subst $(space),:,$(filter-out $(STAGING_DIR_HOST)/%,$(subst :,$(space),$(PATH))))" \
 				command -v "$$$$$$$${cmd%% *}")"; \
-			echo begin which; \
-			which -a $(1); \
-			echo end which; \
+			echo path; \
+			echo $(subst $(space),:,$(filter-out $(STAGING_DIR_HOST)/%,$(subst :,$(space),$(PATH)))); \
+			echo begin which install; \
+			which -a install; \
+			echo end which install; \
+			echo begin which ginstall; \
+			which -a ginstall; \
+			echo end which ginstall; \
 			echo show bin; \
 			echo "$$$$$$$$bin"; \
+			echo ls bin; \
+			ls -lsa "$$$$$$$$bin"; \
 			echo show cmd; \
 			echo "$$$$$$$$cmd"; \
 			echo do cmd; \
