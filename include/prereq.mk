@@ -104,23 +104,23 @@ define SetupHostCommand
 		if [ -n "$$$$$$$$cmd" ]; then \
 			bin="$$$$$$$$(PATH="$(subst $(space),:,$(filter-out $(STAGING_DIR_HOST)/%,$(subst :,$(space),$(PATH))))" \
 				command -v "$$$$$$$${cmd%% *}")"; \
-			echo path; \
+			echo ------ path ------; \
 			echo $(subst $(space),:,$(filter-out $(STAGING_DIR_HOST)/%,$(subst :,$(space),$(PATH)))); \
-			echo begin which install; \
+			echo ------ begin which install ------; \
 			which -a install; \
-			echo end which install; \
-			echo begin which ginstall; \
+			echo ------ end which install ------; \
+			echo ------ begin which ginstall ------; \
 			which -a ginstall; \
-			echo end which ginstall; \
-			echo show bin; \
+			echo ------ end which ginstall ------; \
+			echo ------ show bin ------; \
 			echo "$$$$$$$$bin"; \
-			echo ls bin; \
+			echo ------ ls bin ------; \
 			ls -lsa "$$$$$$$$bin"; \
-			echo show cmd; \
+			echo ------ show cmd ------; \
 			echo "$$$$$$$$cmd"; \
-			echo do cmd; \
+			echo ------ do cmd ------; \
 			$$$$$$$$cmd; \
-			echo do bin version; \
+			echo ------ do bin version ------; \
 			$$$$$$$$bin --version; \
 			if [ -x "$$$$$$$$bin" ] && eval "$$$$$$$$cmd"; then \
 				case "$$$$$$$$(ls -dl -- $(STAGING_DIR_HOST)/bin/$(strip $(1)))" in \
