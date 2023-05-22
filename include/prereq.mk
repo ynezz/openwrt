@@ -120,6 +120,8 @@ define SetupHostCommand
 			echo "$$$$$$$$cmd"; \
 			echo do cmd; \
 			$$$$$$$$cmd; \
+			echo do bin version; \
+			$$$$$$$$bin --version; \
 			if [ -x "$$$$$$$$bin" ] && eval "$$$$$$$$cmd"; then \
 				case "$$$$$$$$(ls -dl -- $(STAGING_DIR_HOST)/bin/$(strip $(1)))" in \
 					*" -> $$$$$$$$bin"*) \
