@@ -66,11 +66,11 @@ jobs:
 
       - name: Make prereq
         working-directory: ${{ env.WORKPATH }}/openwrt
-        run: make defconfig
+        run: make defconfig V=sc
 
       - name: Build tools MacOS
         working-directory: ${{ env.WORKPATH }}/openwrt
-        run: make -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
+        run: make -j$(nproc) V=sc BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
 
       - name: Upload logs
         if: always()
