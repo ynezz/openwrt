@@ -1,18 +1,7 @@
 name: Build host tools
 
 on:
-  pull_request:
-    paths:
-      - 'include/**'
-      - 'tools/**'
-      - '.github/workflows/build-tools.yml'
-      - '.github/workflows/tools.yml'
   push:
-    paths:
-      - 'include/**'
-      - 'tools/**'
-      - '.github/workflows/build-tools.yml'
-      - '.github/workflows/tools.yml'
 
 permissions:
   contents: read
@@ -87,7 +76,3 @@ jobs:
         with:
           name: macos-latest-config
           path: ${{ env.WORKPATH }}/openwrt/.config
-
-  build-linux-buildbot:
-    name: Build tools with buildbot container
-    uses: ./.github/workflows/build-tools.yml
