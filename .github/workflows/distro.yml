@@ -1,13 +1,12 @@
 name: Latest Distro Weekly Build Check
 
 on:
-  push:
   pull_request:
     paths:
       - '.github/workflows/distro*'
 
   schedule:
-    - cron: '30 2 * * 7'
+    - cron: '30 2 * * 5'
 
 permissions:
   contents: read
@@ -36,3 +35,5 @@ jobs:
     with:
       target: x86
       subtarget: 64
+      distro: ${{ matrix.distro }}
+      container: ${{ matrix.container }}

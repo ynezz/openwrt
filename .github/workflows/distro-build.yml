@@ -41,7 +41,7 @@ jobs:
   build:
     name: ${{ inputs.distro }} build ${{ inputs.target }}/${{ inputs.subtarget }}
     runs-on: ubuntu-latest
-    container: $${{ inputs.container }}
+    container: ${{ inputs.container }}
 
     permissions:
       contents: read
