@@ -1,0 +1,170 @@
+name: Distro build sub target
+
+on:
+  workflow_call:
+    inputs:
+      container:
+        type: string
+        required: true
+      distro:
+        type: string
+        required: true
+      target:
+        type: string
+        required: true
+      subtarget:
+        type: string
+        required: true
+      testing:
+        type: boolean
+      include_feeds:
+        type: boolean
+      build_full:
+        default: true
+        type: boolean
+      build_kernel:
+        type: boolean
+      build_all_modules:
+        default: true
+        type: boolean
+      build_all_kmods:
+        default: true
+        type: boolean
+      build_all_boards:
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ inputs.distro }} build ${{ inputs.target }}/${{ inputs.subtarget }}
+    runs-on: ubuntu-latest
+    container: $${{ inputs.container }}
+
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout master directory
+        uses: actions/checkout@v3
+        with:
+          path: openwrt
+
+      - name: Checkout packages feed
+        if: inputs.include_feeds == true
+        uses: actions/checkout@v3
+        with:
+          repository: openwrt/packages
+          path: openwrt/feeds/packages
+
+      - name: Checkout luci feed
+        if: inputs.include_feeds == true
+        uses: actions/checkout@v3
+        with:
+          repository: openwrt/luci
+          path: openwrt/feeds/luci
+
+      - name: Checkout routing feed
+        if: inputs.include_feeds == true
+        uses: actions/checkout@v3
+        with:
+          repository: openwrt/routing
+          path: openwrt/feeds/routing
+
+      - name: Checkout telephony feed
+        if: inputs.include_feeds == true
+        uses: actions/checkout@v3
+        with:
+          repository: openwrt/telephony
+          path: openwrt/feeds/telephony
+
+      - name: Add build user and group
+        run: |
+          sudo groupadd buildbot
+          sudo useradd \
+            --comment "OpenWrt buildbot" \
+            --gid buildbot --shell /bin/bash buildbot
+
+      - name: Fix permissions
+        run: chown -R buildbot:buildbot openwrt
+
+      - name: Update & Install feeds
+        if: inputs.include_feeds == true
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Configure testing kernel
+        if: inputs.testing == true
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: |
+          echo CONFIG_TESTING_KERNEL=y >> .config
+
+      - name: Configure all kernel modules
+        if: inputs.build_all_kmods == true
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: |
+          echo CONFIG_ALL_KMODS=y >> .config
+
+      - name: Configure all modules
+        if: inputs.build_all_modules == true
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: |
+          echo CONFIG_ALL=y >> .config
+
+      - name: Configure all boards
+        if: inputs.build_all_boards == true
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: |
+          echo CONFIG_TARGET_MULTI_PROFILE=y >> .config
+          echo CONFIG_TARGET_PER_DEVICE_ROOTFS=y >> .config
+          echo CONFIG_TARGET_ALL_PROFILES=y >> .config
+
+      - name: Show configuration
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: ./scripts/diffconfig.sh
+
+      - name: Build tools
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: make tools/install -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
+
+      - name: Build toolchain
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: make toolchain/install -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
+
+      - name: Build Kernel
+        if: inputs.build_kernel == true
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: make target/compile -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
+
+      - name: Build Kernel Kmods
+        if: inputs.build_kernel == true
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: make package/linux/compile -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
+
+      - name: Build everything
+        if: inputs.build_full == true
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: make -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
+
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.target }}-${{ inputs.subtarget }}-logs
+          path: "openwrt/logs"

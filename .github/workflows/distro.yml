@@ -1,0 +1,37 @@
+name: Latest Distro Weekly Build Check
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/distro*'
+
+  schedule:
+    - cron: '30 2 * * 7'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Distro Build Check
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+       matrix:
+         distro:
+           - Debian
+           - Fedora
+         include:
+           - distro: Debian
+             container: debian:unstable
+           - distro: Fedora
+             container: fedora:rawhide
+    uses: ./.github/workflows/distro-build.yml
+    with:
+      target: x86
+      subtarget: 64
