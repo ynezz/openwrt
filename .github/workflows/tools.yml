@@ -57,11 +57,30 @@ jobs:
 
       - name: Make prereq
         working-directory: ${{ env.WORKPATH }}/openwrt
-        run: make defconfig
+        run: |
+          echo CONFIG_ALL=y >> .config
+          echo CONFIG_ALL_KMODS=y >> .config
+          echo CONFIG_AUTOREMOVE=y >> .config
+          echo CONFIG_CCACHE=y >> .config
+          echo CONFIG_TARGET_x86=y >> .config
+          echo CONFIG_TARGET_x86_64=y >> .config
+          echo CONFIG_TARGET_MULTI_PROFILE=y >> .config
+          echo CONFIG_TARGET_PER_DEVICE_ROOTFS=y >> .config
+          echo CONFIG_TARGET_ALL_PROFILES=y >> .config
 
-      - name: Build tools MacOS
+          make defconfig
+
+      - name: Show configuration
         working-directory: ${{ env.WORKPATH }}/openwrt
-        run: make tools/install -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
+        run: ./scripts/diffconfig.sh
+
+      - name: Build everything I.
+        working-directory: ${{ env.WORKPATH }}/openwrt
+        run: make -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
+
+      - name: Build everything II.
+        working-directory: ${{ env.WORKPATH }}/openwrt
+        run: make -j$(nproc) BUILD_LOG=1 || ret=$? .github/workflows/scripts/show_build_failures.sh
 
       - name: Upload logs
         if: always()
