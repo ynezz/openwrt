@@ -52,7 +52,6 @@ MESON_HOST_VARS+=VERSION=$(PKG_VERSION)
 MESON_VARS+=VERSION=$(PKG_VERSION)
 
 MESON_HOST_ARGS += \
-	-Dhelp=disabled \
 	-Dcompressed-help=false \
 	-Ddocs=disabled \
 	-Dcrypto_backend=openssl \
