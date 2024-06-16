@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-only
 #
-# Copyright (C) 2007 OpenWrt.org
+# Copyright (C) 2024 OpenWrt.org
 
 TOPDIR:=${CURDIR}
 LC_ALL:=C
