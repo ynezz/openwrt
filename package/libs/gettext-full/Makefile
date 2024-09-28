@@ -23,12 +23,12 @@ PKG_CPE_ID:=cpe:/a:gnu:gettext
 
 PKG_INSTALL:=1
 PKG_BUILD_DEPENDS:=gettext-full/host libunistring libxml2
-PKG_BUILD_PARALLEL:=0
+PKG_BUILD_PARALLEL:=1
 
 PKG_FIXUP:=autoreconf
 
 HOST_BUILD_DEPENDS:=gperf/host libiconv-full/host libunistring/host libxml2/host
-HOST_BUILD_PARALLEL:=0
+HOST_BUILD_PARALLEL:=1
 
 PKG_SUBDIRS:= \
 	$$$$(foreach dir, \
