@@ -1,0 +1,141 @@
+From 353d9c1c4e78413d0ea88823d1d6ad678e811189 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20=C5=A0tetiar?= <ynezz@true.cz>
+Date: Fri, 23 May 2025 18:48:40 +0000
+Subject: [PATCH] cmd: bootmenu: fix arrow key navigation causing incorrect
+ shortcut selection
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Arrow keys were incorrectly triggering shortcut menu selection instead of
+navigation. This happened because shortcut detection was happening before
+escape sequence processing.
+
+When pressing the DOWN arrow key, which sends the escape sequence "\x1b[B",
+the 'B' character was being interpreted as shortcut key 'b' (option 11 in
+the choice_chars array), causing immediate selection of menu option 'b'
+"Reset all settings to factory defaults" instead of moving down one menu item.
+
+Fixes: 5027b962a942 ("cmd: bootmenu: add ability to select item by shortkey")
+Signed-off-by: Petr Štetiar <ynezz@true.cz>
+---
+ common/menu.c | 70 ++++++++++++++++++++++++++++++---------------------
+ 1 file changed, 41 insertions(+), 29 deletions(-)
+
+--- a/common/menu.c
++++ b/common/menu.c
+@@ -464,12 +464,42 @@ int menu_destroy(struct menu *m)
+ 	return 1;
+ }
+ 
++/*
++ * bootmenu_check_shortcut() - Check if a character is a menu shortcut
++ *
++ * This function checks if the given character is a valid menu shortcut.
++ *
++ * c - Input character to check
++ * menu_count - Total number of menu items
++ * cch - CLI character state to store the choice
++ *
++ * Returns: BKEY_CHOICE if a valid shortcut was found, BKEY_NONE otherwise
++ */
++static enum bootmenu_key bootmenu_check_shortcut(int c, int menu_count,
++						 struct cli_ch_state *cch)
++{
++	int choice;
++
++	if (!isprint(c))
++		return BKEY_NONE;
++
++	choice = find_choice(c);
++	if (choice >= 0 && choice < menu_count - 1) {
++		cch->choice = choice;
++		return BKEY_CHOICE;
++	} else if (c == '0') {
++		cch->choice = menu_count - 1;
++		return BKEY_CHOICE;
++	}
++
++	return BKEY_NONE;
++}
++
+ enum bootmenu_key bootmenu_autoboot_loop(struct bootmenu_data *menu,
+ 					 struct cli_ch_state *cch)
+ {
+ 	enum bootmenu_key key = BKEY_NONE;
+ 	int i, c;
+-	int choice;
+ 
+ 	while (menu->delay > 0) {
+ 		if (ansi)
+@@ -487,20 +517,12 @@ enum bootmenu_key bootmenu_autoboot_loop
+ 			menu->delay = -1;
+ 			c = getchar();
+ 
+-			choice = find_choice(c);
+-			if ((choice >= 0 &&
+-			     choice < menu->count - 1)) {
+-				cch->choice = choice;
+-				key = BKEY_CHOICE;
+-				break;
+-			} else if (c == '0') {
+-				cch->choice = menu->count - 1;
+-				key = BKEY_CHOICE;
+-				break;
+-			}
+-
+ 			ichar = cli_ch_process(cch, c);
+ 
++			key = bootmenu_check_shortcut(ichar, menu->count, cch);
++			if (key == BKEY_CHOICE)
++				break;
++
+ 			switch (ichar) {
+ 			case '\0':
+ 				key = BKEY_NONE;
+@@ -512,7 +534,8 @@ enum bootmenu_key bootmenu_autoboot_loop
+ 				key = BKEY_QUIT;
+ 				break;
+ 			default:
+-				key = BKEY_NONE;
++				if (key == BKEY_NONE)
++					key = bootmenu_conv_key(ichar);
+ 				break;
+ 			}
+ 			break;
+@@ -578,7 +601,6 @@ enum bootmenu_key bootmenu_loop(struct b
+ {
+ 	enum bootmenu_key key;
+ 	int c, errchar = 0;
+-	int choice;
+ 
+ 	c = cli_ch_process(cch, 0);
+ 	if (!c) {
+@@ -590,23 +612,13 @@ enum bootmenu_key bootmenu_loop(struct b
+ 		}
+ 		if (!c) {
+ 			c = getchar();
+-
+-			choice = find_choice(c);
+-			if ((choice >= 0 &&
+-			     choice < menu->count - 1)) {
+-				cch->choice = choice;
+-				return BKEY_CHOICE;
+-
+-			} else if (c == '0') {
+-				cch->choice = menu->count - 1;
+-				return BKEY_CHOICE;
+-			}
+-
+ 			c = cli_ch_process(cch, c);
+ 		}
+ 	}
+ 
+-	key = bootmenu_conv_key(c);
++	key = bootmenu_check_shortcut(c, menu->count, cch);
++	if (key == BKEY_CHOICE)
++		return key;
+ 
+-	return key;
++	return bootmenu_conv_key(c);
+ }
